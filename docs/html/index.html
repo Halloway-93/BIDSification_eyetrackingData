@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>BIDSification Data &#8212; BIDSification eyetracking Data 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/_static/custom.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="InfoFiles" href="1_InfoFile.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">BIDSification eyetracking Data</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=chloepasturel&repo=BIDSification_eyetrackingData&type=watch&count=False&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+<h3><a href="#">Table of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="1_InfoFile.html">InfoFiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="2_SettingsFile.html">Setting File</a></li>
+<li class="toctree-l1"><a class="reference internal" href="3_BIDSification.html">Data standardisation</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+              <div class="related top">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          <a href="1_InfoFile.html" title="Next document">InfoFiles</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+
+          <div class="body" role="main">
+            
+  <section id="bidsification-data">
+<h1>BIDSification Data<a class="headerlink" href="#bidsification-data" title="Permalink to this heading">¶</a></h1>
+<p>This python package allows you to automatically organize your eye data in a BIDS format.</p>
+<p>To install this package, please use the following command:</p>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">git+https://github.com/chloepasturel/BIDSification_eyetrackingData.git</span></code></p>
+<p>For more details, we recommend that you consult the BIDS documentation specific to Eye-Tracking.</p>
+<p>The BIDSifier data looks like this:</p>
+<div class="line-block">
+<div class="line"><strong>dataset/</strong></div>
+<div class="line-block">
+<div class="line"><strong>participants.tsv</strong></div>
+<div class="line"><strong>sub-</strong> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <strong>/</strong></div>
+<div class="line-block">
+<div class="line"><em>[ ses-</em> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>/ ]</em></div>
+<div class="line-block">
+<div class="line"><code class="docutils literal notranslate"><span class="pre">&lt;datatype&gt;</span></code> <strong>/</strong></div>
+<div class="line-block">
+<div class="line"><strong>sub-</strong> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>[</em> <em>_ses-</em> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>]</em> <em>[</em> <em>_task-</em> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>]</em> <em>[</em> <em>_acq-</em> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>]</em> <em>[</em> <em>_run-</em> <code class="docutils literal notranslate"><span class="pre">&lt;index&gt;</span></code> <em>]</em> <strong>_eyetrack.</strong> <code class="docutils literal notranslate"><span class="pre">&lt;datatype&gt;</span></code></div>
+<div class="line"><strong>sub-</strong> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>[</em> <em>_ses-</em> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>]</em> <em>[</em> <em>_task-</em> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>]</em> <em>[</em> <em>_acq-</em> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>]</em> <em>[</em> <em>_run-</em> <code class="docutils literal notranslate"><span class="pre">&lt;index&gt;</span></code> <em>]</em> <strong>_eyetrack.json</strong></div>
+<div class="line"><strong>sub-</strong> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>[</em> <em>_ses-</em> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>]</em> <em>[</em> <em>_task-</em> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>]</em> <em>[</em> <em>_acq-</em> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>]</em> <em>[</em> <em>_run-</em> <code class="docutils literal notranslate"><span class="pre">&lt;index&gt;</span></code> <em>]</em> <strong>_eyetrack.tsv</strong></div>
+<div class="line"><strong>sub-</strong> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>[</em> <em>_ses-</em> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>]</em> <em>[</em> <em>_task-</em> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>]</em> <em>[</em> <em>_acq-</em> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>]</em> <em>[</em> <em>_run-</em> <code class="docutils literal notranslate"><span class="pre">&lt;index&gt;</span></code> <em>]</em> <strong>_events.json</strong></div>
+<div class="line"><strong>sub-</strong> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>[</em> <em>_ses-</em> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>]</em> <em>[</em> <em>_task-</em> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>]</em> <em>[</em> <em>_acq-</em> <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> <em>]</em> <em>[</em> <em>_run-</em> <code class="docutils literal notranslate"><span class="pre">&lt;index&gt;</span></code> <em>]</em> <strong>_events.tsv</strong></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>To do this you will need to add two important files to your non-range raw data folder:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="1_InfoFile.html"><span class="doc">InfoFiles</span></a> - containing information about the data files in the directory</p></li>
+<li><p><a class="reference internal" href="2_SettingsFile.html"><span class="doc">Setting File</span></a> - containing the general settings for the task</p></li>
+</ul>
+<p>you can then BIDify your data (see <a class="reference internal" href="3_BIDSification.html"><span class="doc">Data standardisation</span></a>)</p>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          <a href="1_InfoFile.html" title="Next document">InfoFiles</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
