@@ -1,0 +1,79 @@
+{
+    "TaskName": "SuperTache",
+    "Manufacturer": "SR-Research",
+    "ManufacturersModelName": "EYELINK II CL v5.01 Jan 16 2014",
+    "SoftwareVersion": "EYELINK II 1",
+    "DeviceSerialNumber": "CLG-BAF38",
+    "SamplingFrequency": 1000.0,
+    "SampleCoordinateUnit": "pixels",
+    "SampleCoordinateSystem": "gaze-on-screen",
+    "EnvironmentCoordinates": "top-left",
+    "ScreenSize": [
+        37,
+        29.5
+    ],
+    "ScreenResolution": [
+        1280.0,
+        1024.0
+    ],
+    "ScreenDistance": 57,
+    "IncludedEyeMovementEvents": [
+        [
+            "Start of fixation",
+            "SFIX"
+        ],
+        [
+            "End of fixation",
+            "EFIX"
+        ],
+        [
+            "Start of saccade",
+            "SSACC"
+        ],
+        [
+            "End of saccade",
+            "ESACC"
+        ],
+        [
+            "Start of blink",
+            "SBLINK"
+        ],
+        [
+            "End of blink",
+            "EBLINK"
+        ]
+    ],
+    "StartMessage": [
+        "TRIALID 0",
+        "TRIALID 1",
+        "TRIALID 2"
+    ],
+    "EndMessage": [
+        "TRIAL OK"
+    ],
+    "CalibrationType": "HV9",
+    "CalibrationUnit": null,
+    "CalibrationPosition": null,
+    "MaximalCalibrationError": null,
+    "AverageCalibrationError": null,
+    "CalibrationList": [
+        [
+            "HV9",
+            "RIGHT",
+            0.64,
+            0.32,
+            -16.169
+        ]
+    ],
+    "RecordedEye": "Right",
+    "EyeCameraSettings": "Eyelink GL Version 1.2 Sensor=AI7",
+    "FeatureDetectionSettings": null,
+    "GazeMappingSettings": null,
+    "RawDataFilters": "extra",
+    "ScreenRefreshRate": 60,
+    "ScreenAOIDefinition": null,
+    "PupilFitMethod": "ELLIPSE  (5)",
+    "StartTime": null,
+    "StopTime": null,
+    "time": "2017-10-26_121823"
+}

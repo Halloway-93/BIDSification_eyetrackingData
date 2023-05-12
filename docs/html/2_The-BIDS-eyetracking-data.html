@@ -1,0 +1,470 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>The BIDS eyetracking data &#8212; BIDSification eyetracking Data 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/_static/custom.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Conversion of data to BIDS format" href="3_Conversion-of-data-to-BIDS-format.html" />
+    <link rel="prev" title="To install this package" href="1_To-install-this-package.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">BIDSification eyetracking Data</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=chloepasturel&repo=BIDSification_eyetrackingData&type=watch&count=False&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+<h3><a href="index.html">Table of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">BIDSification eyetracking Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="1_To-install-this-package.html">To install this package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">The BIDS eyetracking data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Exemple-of-the-BIDS-eyetracking-data">Exemple of the BIDS eyetracking data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Description-of-the-files">Description of the files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dataset_description.json">dataset_description.json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#participants.tsv">participants.tsv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#participants.json">participants.json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#filename_eyetrack.asc">filename_eyetrack.asc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#filename_eyetrack.tsv.gz">filename_eyetrack.tsv.gz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#filename_eyetrack.json">filename_eyetrack.json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#filename_events.tsv">filename_events.tsv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#filename_events.json">filename_events.json</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="3_Conversion-of-data-to-BIDS-format.html">Conversion of data to BIDS format</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+              <div class="related top">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="1_To-install-this-package.html" title="Previous document">To install this package</a>
+        </li>
+        <li>
+          <a href="3_Conversion-of-data-to-BIDS-format.html" title="Next document">Conversion of data to BIDS format</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+
+          <div class="body" role="main">
+            
+  <section id="The-BIDS-eyetracking-data">
+<h1>The BIDS eyetracking data<a class="headerlink" href="#The-BIDS-eyetracking-data" title="Permalink to this heading">¶</a></h1>
+<div class="admonition-the-tree-structure-of-this-data-is-as-follows admonition">
+<p class="admonition-title"><em>The tree structure of this data is as follows</em></p>
+<div class="line-block">
+<div class="line"><strong>dataset /</strong></div>
+<div class="line"><br /></div>
+<div class="line-block">
+<div class="line"><a class="reference internal" href="3.4_dataset_description.html#dataset_description.json"><span class="std std-ref">dataset_description.json</span></a></div>
+<div class="line"><a class="reference internal" href="#participants.tsv"><span class="std std-ref">participants.tsv</span></a></div>
+<div class="line"><a class="reference internal" href="#participants.json"><span class="std std-ref">participants.json</span></a></div>
+<div class="line"><br /></div>
+<div class="line"><strong>sub-&lt;label&gt; /</strong></div>
+<div class="line-block">
+<div class="line"><em>[ses-&lt;label&gt; /]</em></div>
+<div class="line-block">
+<div class="line"><strong>&lt;datatype&gt; /</strong></div>
+<div class="line-block">
+<div class="line"><em>&lt;filename&gt;</em> <a class="reference internal" href="#filename_eyetrack.tsv.gz"><span class="std std-ref">_eyetrack.tsv.gz</span></a></div>
+<div class="line"><em>&lt;filename&gt;</em> <a class="reference internal" href="#filename_eyetrack.json"><span class="std std-ref">_eyetrack.json</span></a></div>
+<div class="line"><em>&lt;filename&gt;</em> <a class="reference internal" href="#filename_events.tsv"><span class="std std-ref">_events.tsv</span></a></div>
+<div class="line"><em>&lt;filename&gt;</em> <a class="reference internal" href="#filename_events.json"><span class="std std-ref">_events.json</span></a></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>For more details on the tree structure of this data, see the <a class="reference external" href="https://bids-specification--1128.org.readthedocs.build/en/1128/introduction.html">BIDS documentation</a>.</p>
+<section id="Exemple-of-the-BIDS-eyetracking-data">
+<h2>Exemple of the BIDS eyetracking data<a class="headerlink" href="#Exemple-of-the-BIDS-eyetracking-data" title="Permalink to this heading">¶</a></h2>
+<p>Here we present an example of a data tree</p>
+<p>In this example we have eye movement data from two subjects (<em>sub-001</em> and <em>sub-002</em>). <br/>
+This data comes from the Eyelink tracking system. <br/>
+The first subject had one session and the second had two.</p>
+<div class="admonition-exemple-of-the-bids-eyetracking-data admonition">
+<p class="admonition-title"><em>Exemple of the BIDS eyetracking data</em></p>
+<div class="line-block">
+<div class="line"><strong>dataBIDS /</strong></div>
+<div class="line"><br /></div>
+<div class="line-block">
+<div class="line"><a class="reference internal" href="3.4_dataset_description.html#dataset_description.json"><span class="std std-ref">dataset_description.json</span></a></div>
+<div class="line"><a class="reference internal" href="#participants.tsv"><span class="std std-ref">participants.tsv</span></a></div>
+<div class="line"><a class="reference internal" href="#participants.json"><span class="std std-ref">participants.json</span></a></div>
+<div class="line"><br /></div>
+<div class="line"><strong>sub-001 /</strong></div>
+<div class="line-block">
+<div class="line"><strong>eyetrack /</strong></div>
+<div class="line-block">
+<div class="line"><a class="reference internal" href="#filename_eyetrack.asc"><span class="std std-ref">sub-001_eyetrack.asc</span></a></div>
+<div class="line"><a class="reference internal" href="#filename_eyetrack.tsv.gz"><span class="std std-ref">sub-001_eyetrack.tsv.gz</span></a></div>
+<div class="line"><a class="reference internal" href="#filename_eyetrack.json"><span class="std std-ref">sub-001_eyetrack.json</span></a></div>
+<div class="line"><a class="reference internal" href="#filename_events.tsv"><span class="std std-ref">sub-001_events.tsv</span></a></div>
+<div class="line"><a class="reference internal" href="#filename_events.json"><span class="std std-ref">sub-001_events.json</span></a></div>
+<div class="line"><br /></div>
+</div>
+</div>
+<div class="line"><strong>sub-002 /</strong></div>
+<div class="line-block">
+<div class="line"><strong>ses-001 /</strong></div>
+<div class="line-block">
+<div class="line"><strong>eyetrack /</strong></div>
+<div class="line-block">
+<div class="line"><a class="reference internal" href="#filename_eyetrack.asc"><span class="std std-ref">sub-002_ses-001_eyetrack.asc</span></a></div>
+<div class="line"><a class="reference internal" href="#filename_eyetrack.tsv.gz"><span class="std std-ref">sub-002_ses-001_eyetrack.tsv.gz</span></a></div>
+<div class="line"><a class="reference internal" href="#filename_eyetrack.json"><span class="std std-ref">sub-002_ses-001_eyetrack.json</span></a></div>
+<div class="line"><a class="reference internal" href="#filename_events.tsv"><span class="std std-ref">sub-002_ses-001_events.tsv</span></a></div>
+<div class="line"><a class="reference internal" href="#filename_events.json"><span class="std std-ref">sub-002_ses-001_events.json</span></a></div>
+</div>
+</div>
+<div class="line"><strong>ses-002 /</strong></div>
+<div class="line-block">
+<div class="line"><strong>eyetrack /</strong></div>
+<div class="line-block">
+<div class="line"><a class="reference internal" href="#filename_eyetrack.asc"><span class="std std-ref">sub-002_ses-002_eyetrack.asc</span></a></div>
+<div class="line"><a class="reference internal" href="#filename_eyetrack.tsv.gz"><span class="std std-ref">sub-002_ses-002_eyetrack.tsv.gz</span></a></div>
+<div class="line"><a class="reference internal" href="#filename_eyetrack.json"><span class="std std-ref">sub-002_ses-002_eyetrack.json</span></a></div>
+<div class="line"><a class="reference internal" href="#filename_events.tsv"><span class="std std-ref">sub-002_ses-002_events.tsv</span></a></div>
+<div class="line"><a class="reference internal" href="#filename_events.json"><span class="std std-ref">sub-002_ses-002_events.json</span></a></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<br/></section>
+<section id="Description-of-the-files">
+<h2>Description of the files<a class="headerlink" href="#Description-of-the-files" title="Permalink to this heading">¶</a></h2>
+<br/><br/><section id="dataset_description.json">
+<h3>dataset_description.json<a class="headerlink" href="#dataset_description.json" title="Permalink to this heading">¶</a></h3>
+<p>The file <code class="docutils literal notranslate"><span class="pre">dataset_description.json</span></code> is a JSON file describing the dataset. <br/>
+See the  <a class="reference external" href="https://bids-specification--1128.org.readthedocs.build/en/1128/modality-agnostic-files.html#dataset_descriptionjson">documentation</a> for more details.</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text"><strong>For exemple :</strong></span><a class="headerlink" href="#id7" title="Permalink to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SuperTache&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;BIDSVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.8.1&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<br/><br/></section>
+<section id="participants.tsv">
+<h3>participants.tsv<a class="headerlink" href="#participants.tsv" title="Permalink to this heading">¶</a></h3>
+<p>The  file <code class="docutils literal notranslate"><span class="pre">participants.tsv</span></code> describe the properties of the participants such as GUID, age, sex, and handedness. <br/>
+See the  <a class="reference external" href="https://bids-specification--1128.org.readthedocs.build/en/1128/modality-agnostic-files.html#participants-file">documentation</a> for more details.</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text"><strong>For exemple :</strong></span><a class="headerlink" href="#id8" title="Permalink to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>participant_id GUID
+001 3aabe8bb-b5dd-4934-aeaa-cda1e0026609
+002 5b2ee5b9-549b-4624-88b9-897295f3e5a0
+</pre></div>
+</div>
+</div>
+<br/><br/></section>
+<section id="participants.json">
+<h3>participants.json<a class="headerlink" href="#participants.json" title="Permalink to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">participants.json</span></code> file documents the columns present in the <code class="docutils literal notranslate"><span class="pre">participants.tsv</span></code> file. <br/>
+See the  <a class="reference external" href="https://bids-specification--1128.org.readthedocs.build/en/1128/modality-agnostic-files.html#participants-file">documentation</a> for more details.</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text"><strong>For exemple :</strong></span><a class="headerlink" href="#id9" title="Permalink to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;GUID&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;Description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;globally unique identifier&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<br/><br/></section>
+<section id="filename_eyetrack.asc">
+<h3>filename_eyetrack.asc<a class="headerlink" href="#filename_eyetrack.asc" title="Permalink to this heading">¶</a></h3>
+<p>The file <em>&lt;filename&gt;</em> <code class="docutils literal notranslate"><span class="pre">_eyetrack.asc</span></code> is the raw data file from the Eyelink tracking system.</p>
+<br/><br/></section>
+<section id="filename_eyetrack.tsv.gz">
+<h3>filename_eyetrack.tsv.gz<a class="headerlink" href="#filename_eyetrack.tsv.gz" title="Permalink to this heading">¶</a></h3>
+<p>The file <em>&lt;filename&gt;</em> <code class="docutils literal notranslate"><span class="pre">_eyetrack.tsv.gz</span></code> contains the eye-tracking data. <br/>
+See the  <a class="reference external" href="https://bids-specification--1128.org.readthedocs.build/en/1128/modality-specific-files/eye-tracking.html#tabular-file-_eyetracktsvgz">documentation</a> for more details.</p>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text"><strong>For exemple :</strong></span><a class="headerlink" href="#id10" title="Permalink to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>eye_timestamp eye1_x_coordinate eye1_y_coordinate eye1_pupil_size
+9053021.0 650.8 528.6 1853.0
+9053022.0 650.0 528.8 1852.0
+9053023.0 649.3 528.8 1850.0
+9053024.0 647.6 528.8 1849.0
+9053025.0 646.0 528.6 1848.0
+9053026.0 643.6 528.5 1847.0
+9053027.0 641.3 528.6 1848.0
+9053028.0 638.6 528.6 1850.0
+9053029.0 636.2 528.9 1849.0
+9053030.0 634.3 529.4 1847.0
+9053031.0 632.9 529.8 1844.0
+9053032.0 632.1 530.0 1842.0
+9053033.0 631.8 530.1 1840.0
+9053034.0 631.9 530.1 1838.0
+9053035.0 632.6 530.0 1837.0
+9053036.0 633.3 530.0 1837.0
+9053037.0 634.4 530.0 1837.0
+9053038.0 635.0 530.0 1836.0
+9053039.0 635.6 529.9 1836.0
+9053040.0 635.7 529.9 1836.0
+9053041.0 635.6 529.5 1836.0
+</pre></div>
+</div>
+</div>
+<br/><br/></section>
+<section id="filename_eyetrack.json">
+<h3>filename_eyetrack.json<a class="headerlink" href="#filename_eyetrack.json" title="Permalink to this heading">¶</a></h3>
+<p>The file <em>&lt;filename&gt;</em> <code class="docutils literal notranslate"><span class="pre">_eyetrack.json</span></code> contains the details of the experiment. <br/>
+See the  <a class="reference external" href="https://bids-specification--1128.org.readthedocs.build/en/1128/modality-specific-files/eye-tracking.html#sidecar-json-document-_eyetrackjson">documentation</a> for more details.</p>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text"><strong>For exemple :</strong></span><a class="headerlink" href="#id11" title="Permalink to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;TaskName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SuperTache&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Manufacturer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SR-Research&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;ManufacturersModelName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EYELINK II CL v5.01 Jan 16 2014&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;SoftwareVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EYELINK II 1&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;DeviceSerialNumber&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CLG-BAF38&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;SamplingFrequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1000.0</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;SampleCoordinateUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pixels&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;SampleCoordinateSystem&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gaze-on-screen&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;EnvironmentCoordinates&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;top-left&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;ScreenSize&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="mi">37</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="mf">29.5</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;ScreenResolution&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="mf">1280.0</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="mf">1024.0</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;ScreenDistance&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">57</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;IncludedEyeMovementEvents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;Start of fixation&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;SFIX&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">],</span><span class="w"></span>
+<span class="w">        </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;End of fixation&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;EFIX&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">],</span><span class="w"></span>
+<span class="w">        </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;Start of saccade&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;SSACC&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">],</span><span class="w"></span>
+<span class="w">        </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;End of saccade&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;ESACC&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">],</span><span class="w"></span>
+<span class="w">        </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;Start of blink&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;SBLINK&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">],</span><span class="w"></span>
+<span class="w">        </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;End of blink&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;EBLINK&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">]</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;StartMessage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;TRIALID 0&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;TRIALID 1&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;TRIALID 2&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;EndMessage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;TRIAL OK&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CalibrationType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;HV9&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CalibrationUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CalibrationPosition&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;MaximalCalibrationError&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;AverageCalibrationError&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;CalibrationList&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;HV9&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;RIGHT&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="mf">0.64</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="mf">0.32</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="mf">-16.169</span><span class="w"></span>
+<span class="w">        </span><span class="p">]</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;RecordedEye&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Right&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;EyeCameraSettings&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Eyelink GL Version 1.2 Sensor=AI7&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;FeatureDetectionSettings&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;GazeMappingSettings&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;RawDataFilters&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;extra&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;ScreenRefreshRate&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;ScreenAOIDefinition&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;PupilFitMethod&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ELLIPSE  (5)&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;StartTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;StopTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2017-10-26_121823&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<br/><br/></section>
+<section id="filename_events.tsv">
+<h3>filename_events.tsv<a class="headerlink" href="#filename_events.tsv" title="Permalink to this heading">¶</a></h3>
+<p>The file <em>&lt;filename&gt;</em> <code class="docutils literal notranslate"><span class="pre">_events.tsv</span></code> describes the timing and other properties of events recorded during an experiment. <br/>
+See the  <a class="reference external" href="https://bids-specification--1128.org.readthedocs.build/en/1128/modality-specific-files/task-events.html#task-events">documentation</a> for more details.</p>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text"><strong>For exemple :</strong></span><a class="headerlink" href="#id12" title="Permalink to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>onset duration sample trial eventIdentifier StimulusOn StimulusOff TargetOn TargetOff SFIX EFIX SSACC ESACC SBLINK EBLINK num_trial num_block dir_target proba switch
+0.0 2.418 9052467 1 &quot;TRIALID 0&quot; 9053125 9053688 9053988 9054758 &quot;[9053030, 9054360, 9054535, 9054755]&quot; &quot;[9054334.0, 9054519.0, 9054736.0, 9054866.0]&quot; &quot;[9054335, 9054520, 9054737]&quot; &quot;[9054359.0, 9054534.0, 9054754.0]&quot;   1 1 0.0 0.6475235198239354 0.0
+3.518 2.42 9055985 2 &quot;TRIALID 1&quot; 9056588 9057191 9057491 9058273 &quot;[9056546, 9056780, 9057857, 9058325]&quot; &quot;[9056763.0, 9057821.0, 9058298.0, 9058372.0]&quot; &quot;[9056764, 9057822, 9058299]&quot; &quot;[9056779.0, 9057856.0, 9058324.0]&quot;   2 1 1.0 0.6475235198239354 0.0
+7.038 2.447 9059505 3 &quot;TRIALID 2&quot; 9060106 9060739 9061040 9061821 &quot;[9060066, 9060181, 9060314, 9061025, 9061353, 9061499]&quot; &quot;[9060173.0, 9060302.0, 9061008.0, 9061319.0, 9061476.0, 9061920.0]&quot; &quot;[9060174, 9060303, 9061009, 9061320, 9061477]&quot; &quot;[9060180.0, 9060313.0, 9061024.0, 9061352.0, 9061498.0]&quot;   3 1 1.0 0.6475235198239354 0.0
+</pre></div>
+</div>
+</div>
+<br/><br/></section>
+<section id="filename_events.json">
+<h3>filename_events.json<a class="headerlink" href="#filename_events.json" title="Permalink to this heading">¶</a></h3>
+<p>The <em>&lt;filename&gt;</em> <code class="docutils literal notranslate"><span class="pre">_events.json</span></code> file documents the columns present in the <em>&lt;filename&gt;</em> <code class="docutils literal notranslate"><span class="pre">_events.tsv</span></code> file. <br/>
+See the  <a class="reference external" href="https://bids-specification--1128.org.readthedocs.build/en/1128/modality-specific-files/task-events.html#task-events">documentation</a> for more details.</p>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text"><strong>For exemple :</strong></span><a class="headerlink" href="#id13" title="Permalink to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;StimulusOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;Description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;appearance of the fixation point&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;StimulusOff&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;Description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disappearance of the fixation point&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;TargetOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;Description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;appearance of the moving target&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;TargetOff&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;Description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;disappearance of the moving target&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;SFIX&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;Description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Start of fixation&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;EFIX&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;Description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;End of fixation&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;SSACC&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;Description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Start of saccade&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;ESACC&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;Description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;End of saccade&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;SBLINK&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;Description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Start of blink&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;EBLINK&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;Description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;End of blink&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;dir_target&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;Description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;direction of the Target&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;num_block&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;Description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;numero of block&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;num_trial&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;Description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;numero of the trial&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;proba&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;Description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;probability that the movement of the target is to the right&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;switch&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;Description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;switch of the probability&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<hr class="docutils" />
+</section>
+</section>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="1_To-install-this-package.html" title="Previous document">To install this package</a>
+        </li>
+        <li>
+          <a href="3_Conversion-of-data-to-BIDS-format.html" title="Next document">Conversion of data to BIDS format</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

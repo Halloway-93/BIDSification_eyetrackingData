@@ -37,7 +37,7 @@
 
 
 <p>
-<iframe src="https://ghbtns.com/github-btn.html?user=invibe&repo=ANEMO&type=watch&count=False&size=large&v=2"
+<iframe src="https://ghbtns.com/github-btn.html?user=chloepasturel&repo=BIDSification_eyetrackingData&type=watch&count=False&size=large&v=2"
   allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
 </p>
 
@@ -48,9 +48,10 @@
 
 <h3><a href="../../index.html">Table of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../1_InfoFile.html">InfoFiles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../2_SettingsFile.html">Setting File</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../3_BIDSification.html">Data standardisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">BIDSification eyetracking Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../1_To-install-this-package.html">To install this package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../2_The-BIDS-eyetracking-data.html">The BIDS eyetracking data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../3_Conversion-of-data-to-BIDS-format.html">Conversion of data to BIDS format</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">
@@ -83,6 +84,7 @@
 <span class="c1"># -*- coding: utf-8 -*-</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">.File</span> <span class="kn">import</span> <span class="n">open_file</span><span class="p">,</span> <span class="n">save_file</span>
 
 
@@ -186,7 +188,75 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="n">doc_fct</span>
 
 
-<div class="viewcode-block" id="StandardisationProcess"><a class="viewcode-back" href="../../2_SettingsFile.html#BIDSification_eyetrackingData.StandardisationProcess">[docs]</a><span class="k">class</span> <span class="nc">StandardisationProcess</span><span class="p">:</span>
+<span class="k">class</span> <span class="nc">settingsEventsError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Returns an error if the settingsEvents file is not good</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">settingsEventsfilesname</span><span class="p">,</span> <span class="n">list_events</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">settingsEventsfilesname</span> <span class="o">=</span> <span class="n">settingsEventsfilesname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">list_events</span> <span class="o">=</span> <span class="n">list_events</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="n">error</span><span class="o">==</span><span class="s1">&#39;noSettingsEventsFiles&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">create_settingsEvents</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">error</span><span class="o">==</span><span class="s1">&#39;missingEvents&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">missing_Events</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
+
+    <span class="k">def</span> <span class="nf">create_settingsEvents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Error message if the eventJSON file does not exist</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;The file containing the events settings &quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;does not exist </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;or is not in the right format </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;this file must be in json format and &quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;must contain information on the following events: &quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">list_events</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;this information must contain a description &quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;of the event: &quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;&#39;event&#39;: {&#39;Description&#39;:{&#39;description of event&#39;}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;Before continuing, you can create it &quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;or do it automatically with the function:</span><span class="se">\n</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="n">fct</span> <span class="o">=</span> <span class="n">StandardisationProcess</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">create_settingsEvents</span>
+        <span class="n">arg</span> <span class="o">=</span> <span class="n">fct</span><span class="o">.</span><span class="vm">__code__</span><span class="o">.</span><span class="n">co_varnames</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">fct</span><span class="o">.</span><span class="vm">__code__</span><span class="o">.</span><span class="n">co_argcount</span><span class="p">]</span>
+
+        <span class="n">name_fct</span> <span class="o">=</span> <span class="n">fct</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">doc_fct</span> <span class="o">=</span> <span class="n">fct</span><span class="o">.</span><span class="vm">__doc__</span>
+        <span class="n">arg_fct</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">arg</span><span class="p">]))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="n">name_fct</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="n">arg_fct</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="n">doc_fct</span>
+
+    <span class="k">def</span> <span class="nf">missing_Events</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Error message if the settingsEvents file does not contain all events</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Your </span><span class="si">%s</span><span class="s2"> file containing &quot;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsEventsfilesname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;the events settings is incomplete </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;the </span><span class="si">%s</span><span class="s2"> events &quot;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">list_events</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;are not filled in. </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;this information must contain a description &quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;of the event: &quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;&#39;event&#39;: {&#39;Description&#39;:{&#39;description of event&#39;}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;Before continuing, please complete your file and &quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;check that it contains the correct information &quot;</span>
+
+
+<div class="viewcode-block" id="StandardisationProcess"><a class="viewcode-back" href="../../3.6_SettingsEvents.html#BIDSification_eyetrackingData.StandardisationProcess">[docs]</a><span class="k">class</span> <span class="nc">StandardisationProcess</span><span class="p">:</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Processes to standardise data</span>
@@ -204,9 +274,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">participant</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">taskname</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">infofilesname</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settingsEventsfilename</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">required_setting</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;TaskName&#39;</span><span class="p">,</span>
-                                 <span class="s1">&#39;SamplingFrequency&#39;</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">required_setting</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;SamplingFrequency&#39;</span><span class="p">,</span>
                                  <span class="s1">&#39;SampleCoordinateUnit&#39;</span><span class="p">,</span>
                                  <span class="s1">&#39;SampleCoordinateSystem&#39;</span><span class="p">,</span>
                                  <span class="s1">&#39;EnvironmentCoordinates&#39;</span><span class="p">,</span>
@@ -218,7 +288,7 @@
     <span class="c1">#--------------------------------------------------------------------------</span>
     <span class="c1"># infoFiles</span>
     <span class="c1">#--------------------------------------------------------------------------</span>
-<div class="viewcode-block" id="StandardisationProcess.check_infoFiles"><a class="viewcode-back" href="../../1_InfoFile.html#BIDSification_eyetrackingData.StandardisationProcess.check_infoFiles">[docs]</a>    <span class="k">def</span> <span class="nf">check_infoFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">dataformat</span><span class="p">):</span>
+<div class="viewcode-block" id="StandardisationProcess.check_infoFiles"><a class="viewcode-back" href="../../3.3_InfoFiles.html#BIDSification_eyetrackingData.StandardisationProcess.check_infoFiles">[docs]</a>    <span class="k">def</span> <span class="nf">check_infoFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">dataformat</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Check an information file on all the data files present in the</span>
@@ -318,7 +388,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">infofilesname</span> <span class="o">=</span> <span class="n">infoFiles</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="StandardisationProcess.create_infoFiles"><a class="viewcode-back" href="../../1_InfoFile.html#BIDSification_eyetrackingData.StandardisationProcess.create_infoFiles">[docs]</a>    <span class="k">def</span> <span class="nf">create_infoFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataformat</span><span class="p">):</span>
+<div class="viewcode-block" id="StandardisationProcess.create_infoFiles"><a class="viewcode-back" href="../../3.3_InfoFiles.html#BIDSification_eyetrackingData.StandardisationProcess.create_infoFiles">[docs]</a>    <span class="k">def</span> <span class="nf">create_infoFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataformat</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Create an information file on all the data files present in the</span>
@@ -347,14 +417,16 @@
                     <span class="c1">#----------------------------------------------------------</span>
                     <span class="c1"># check if eventsfile exist</span>
                     <span class="c1">#----------------------------------------------------------</span>
-                    <span class="n">filename_</span> <span class="o">=</span> <span class="n">f</span><span class="p">[:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">dataformat</span><span class="p">)]</span>
-                    <span class="n">path_events</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">filename_</span><span class="o">+</span><span class="s1">&#39;.tsv&#39;</span><span class="p">)</span>
-                    <span class="n">events_is_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path_events</span><span class="p">)</span>
+                    <span class="n">eventsfilename</span> <span class="o">=</span> <span class="kc">None</span>
 
-                    <span class="k">if</span> <span class="n">events_is_file</span><span class="p">:</span>
-                        <span class="n">eventsfilename</span> <span class="o">=</span> <span class="n">filename_</span><span class="o">+</span><span class="s1">&#39;.tsv&#39;</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">eventsfilename</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">filename_</span> <span class="o">=</span> <span class="n">f</span><span class="p">[:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">dataformat</span><span class="p">)]</span>
+
+                    <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;.tsv&#39;</span><span class="p">,</span> <span class="s1">&#39;.csv&#39;</span><span class="p">]:</span>
+                        <span class="n">path_events</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">filename_</span><span class="o">+</span><span class="n">ext</span><span class="p">)</span>
+                        <span class="n">events_is_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path_events</span><span class="p">)</span>
+
+                        <span class="k">if</span> <span class="n">events_is_file</span><span class="p">:</span>
+                            <span class="n">eventsfilename</span> <span class="o">=</span> <span class="n">filename_</span><span class="o">+</span><span class="n">ext</span>
                     <span class="c1">#----------------------------------------------------------</span>
 
                     <span class="n">path</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirpath</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
@@ -382,7 +454,7 @@
 
         <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="StandardisationProcess.completed_infoFiles_participant_id"><a class="viewcode-back" href="../../1_InfoFile.html#BIDSification_eyetrackingData.StandardisationProcess.completed_infoFiles_participant_id">[docs]</a>    <span class="k">def</span> <span class="nf">completed_infoFiles_participant_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+<div class="viewcode-block" id="StandardisationProcess.completed_infoFiles_participant_id"><a class="viewcode-back" href="../../3.3_InfoFiles.html#BIDSification_eyetrackingData.StandardisationProcess.completed_infoFiles_participant_id">[docs]</a>    <span class="k">def</span> <span class="nf">completed_infoFiles_participant_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Complete an information files with the participants&#39; identifiers</span>
@@ -491,6 +563,57 @@
 
 
     <span class="c1">#--------------------------------------------------------------------------</span>
+    <span class="c1"># dataset_description</span>
+    <span class="c1">#--------------------------------------------------------------------------</span>
+    <span class="k">def</span> <span class="nf">dataset_description_init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Initialize the dataset_description</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dataset_description: dict</span>
+<span class="sd">            A dictionary containing the description of the experiment</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">dataset_description</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="c1">#----------------------------------------------------------------------</span>
+        <span class="c1"># REQUIRED</span>
+        <span class="c1">#----------------------------------------------------------------------</span>
+        <span class="n">dataset_description</span><span class="p">[</span><span class="s1">&#39;Name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Name of the dataset.</span>
+                                           <span class="c1"># (string)</span>
+
+        <span class="n">dataset_description</span><span class="p">[</span><span class="s1">&#39;BIDSVersion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1.8.1&quot;</span> <span class="c1"># The version of the BIDS</span>
+                                                     <span class="c1"># standard that was used.</span>
+                                                     <span class="c1"># (string)</span>
+
+
+
+        <span class="k">return</span> <span class="n">dataset_description</span>
+
+<div class="viewcode-block" id="StandardisationProcess.create_dataset_description"><a class="viewcode-back" href="../../3.4_dataset_description.html#BIDSification_eyetrackingData.StandardisationProcess.create_dataset_description">[docs]</a>    <span class="k">def</span> <span class="nf">create_dataset_description</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create an dataset_description file in the directory</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Initialize the settings</span>
+        <span class="n">dataset_description</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_description_init</span><span class="p">()</span>
+
+        <span class="c1"># save the settings</span>
+        <span class="n">save_file</span><span class="p">(</span><span class="n">dataset_description</span><span class="p">,</span> <span class="s1">&#39;dataset_description.json&#39;</span><span class="p">,</span>
+                  <span class="bp">self</span><span class="o">.</span><span class="n">dirpath</span><span class="p">)</span>
+
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;The file </span><span class="si">%s</span><span class="s2">/dataset_description.json &quot;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">dirpath</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;has just been created </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;Before continuing, please complete it with &quot;</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;the correct information &quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
+
+
+    <span class="c1">#--------------------------------------------------------------------------</span>
     <span class="c1"># Settings</span>
     <span class="c1">#--------------------------------------------------------------------------</span>
     <span class="k">def</span> <span class="nf">settings_init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -507,200 +630,234 @@
         <span class="n">settings</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
         <span class="c1">#----------------------------------------------------------------------</span>
-        <span class="c1"># REQUIRED</span>
-        <span class="c1">#----------------------------------------------------------------------</span>
-        <span class="c1"># Name of the task. No two tasks should have the same name. The task</span>
-        <span class="c1">#  label included in the file name is derived from this TaskName field</span>
-        <span class="c1">#  by removing all non-alphanumeric (`[a-zA-Z0-9]`) characters.</span>
-        <span class="c1">#  For example `TaskName` `&quot;faces n-back&quot;` will correspond to task</span>
-        <span class="c1">#  label `facesnback`. A RECOMMENDED convention is to name resting</span>
-        <span class="c1">#  state task using labels beginning with `rest`</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;TaskName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
-
-        <span class="c1">#----------------------------------------------------------------------</span>
         <span class="c1"># RECOMMENDED</span>
         <span class="c1">#----------------------------------------------------------------------</span>
-        <span class="c1"># The name of the institution in charge of the equipment that produced</span>
-        <span class="c1">#  the measurements</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;InstitutionName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;TaskName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Name of the task. No two tasks should</span>
+                                    <span class="c1"># have the same name.</span>
+                                    <span class="c1"># (string)</span>
 
-        <span class="c1"># The address of the institution in charge of the equipment that</span>
-        <span class="c1">#  produced the measurements</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;InstitutionAddress&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;Manufacturer&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Manufacturer of the equipment that</span>
+                                        <span class="c1"># produced the measurements.</span>
+                                        <span class="c1"># (string)</span>
 
-        <span class="c1"># Manufacturer of the equipment that produced the measurements.</span>
-        <span class="c1">#  Manufacturer of the eye-tracking system</span>
-        <span class="c1">#  For example `&quot;SR-Research&quot;`, `&quot;Tobii&quot;`, `&quot;SMI&quot;`, `&quot;Gazepoint&quot;`,</span>
-        <span class="c1">#  `&quot;Pupil Labs&quot;`, `&quot;Custom built&quot;`, ... , `&quot;Other&quot;`</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;Manufacturer&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;ManufacturersModelName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Manufacturer&#39;s model name</span>
+                                                  <span class="c1"># of the equipment that</span>
+                                                  <span class="c1"># produced the measurements.</span>
+                                                  <span class="c1"># (string)</span>
 
-        <span class="c1"># Manufacturer&#39;s model name of the equipment that produced the</span>
-        <span class="c1">#  measurements. Manufacturer&#39;s designation of the eye-tracker model</span>
-        <span class="c1">#  For example `&quot;Eye-link 1000&quot;`</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;ManufacturersModelName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;SoftwareVersion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Manufacturer&#39;s designation of</span>
+                                           <span class="c1"># software version of the equipment</span>
+                                           <span class="c1"># that produced the measurements.</span>
+                                           <span class="c1"># (string)</span>
 
-        <span class="c1"># Version of the software that was used to present the stimuli</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;SoftwareVersion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
-
-        <span class="c1"># Longer description of the task.</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;TaskDescription&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
-
-        <span class="c1"># Text of the instructions given to participants before the recording.</span>
-        <span class="c1">#  Text of the instructions given to participants before the experiment</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;Instructions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
-
-        <span class="c1"># [URI](/02-common-principles.html#uniform-resource-indicator) of the</span>
-        <span class="c1">#  corresponding [Cognitive Atlas](https://www.cognitiveatlas.org/)</span>
-        <span class="c1">#  Task term.</span>
-        <span class="c1">#  For example, [Resting State with eyes closed]</span>
-        <span class="c1">#  (http://www.cognitiveatlas.org/task/id/trm_54e69c642d89b)</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;CogAtlasID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
-
-        <span class="c1"># [URI](/02-common-principles.html#uniform-resource-indicator) of the</span>
-        <span class="c1">#  corresponding [CogPO](http://www.cogpo.org/) term that describes the</span>
-        <span class="c1">#  task</span>
-        <span class="c1">#  For example, [Rest](http://wiki.cogpo.org/index.php?title=Rest)</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;CogPOID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
-
-        <span class="c1"># The serial number of the equipment that produced the measurements.</span>
-        <span class="c1">#  A pseudonym can also be used to prevent the equipment from being</span>
-        <span class="c1">#  identifiable, so long as each pseudonym is unique within the dataset</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;DeviceSerialNumber&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;DeviceSerialNumber&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># The serial number of the</span>
+                                              <span class="c1"># equipment that produced the</span>
+                                              <span class="c1"># measurements. A pseudonym can</span>
+                                              <span class="c1"># also be used to prevent the</span>
+                                              <span class="c1"># equipment from being</span>
+                                              <span class="c1"># identifiable, so long as each</span>
+                                              <span class="c1"># pseudonym is unique within the</span>
+                                              <span class="c1"># dataset.</span>
+                                              <span class="c1"># (string)</span>
 
         <span class="c1">#----------------------------------------------------------------------</span>
         <span class="c1"># REQUIRED</span>
         <span class="c1">#----------------------------------------------------------------------</span>
-        <span class="c1"># Sampling frequency (in Hz) of the corresponding data in the recording</span>
-        <span class="c1">#  (for example, `1000`). If the sampling frequency change across run,</span>
-        <span class="c1">#  sidecar JSON document must be created specifying the run number</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;SamplingFrequency&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># number</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;SamplingFrequency&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Sampling frequency (in Hz) of</span>
+                                             <span class="c1"># all the data in the recording,</span>
+                                             <span class="c1"># regardless of their type (for</span>
+                                             <span class="c1"># example, 2400).</span>
+                                             <span class="c1"># (number)</span>
 
-        <span class="c1"># Unit of individual samples (`&quot;pixel&quot;`, `&quot;mm&quot;` or `&quot;cm&quot;`)</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;SampleCoordinateUnit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;SampleCoordinateUnit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Unit of individual samples</span>
+                                                <span class="c1"># (&quot;pixel&quot;, &quot;mm&quot; or &quot;cm&quot;).</span>
+                                                <span class="c1"># (string)</span>
 
-        <span class="c1"># Classical screen-based eye tracking data would be `&quot;gaze-on-screen&quot;`,</span>
-        <span class="c1">#  but `&quot;eye-in-head&quot;` or `&quot;gaze-in-world&quot;` are also possible</span>
-        <span class="c1">#  coordinate systems (for example for virtual reality)</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;SampleCoordinateSystem&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;SampleCoordinateSystem&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Coordinate system of the</span>
+                                                  <span class="c1"># sampled gaze position data.</span>
+                                                  <span class="c1"># Generally eye-tracker are</span>
+                                                  <span class="c1"># set to use &quot;gaze-on-screen&quot;</span>
+                                                  <span class="c1"># coordinate system but you</span>
+                                                  <span class="c1"># may use &quot;eye-in-head&quot; or</span>
+                                                  <span class="c1"># &quot;gaze-in-world&quot; or other</span>
+                                                  <span class="c1"># alternatives of your</span>
+                                                  <span class="c1"># choice. If you use the</span>
+                                                  <span class="c1"># standard &quot;gaze-on-screen&quot;,</span>
+                                                  <span class="c1"># it is RECOMMENDED to use</span>
+                                                  <span class="c1"># this exact label.</span>
+                                                  <span class="c1"># (string)</span>
 
-        <span class="c1"># Coordinates origin (or zero), for gaze-on-screen coordinates, this</span>
-        <span class="c1">#  can be for example: `&quot;top-left&quot;` or `&quot;center&quot;`. For virtual reality</span>
-        <span class="c1">#  this could be, amongst others, spherical coordinates</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;EnvironmentCoordinates&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;EnvironmentCoordinates&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Coordinates origin (or</span>
+                                                  <span class="c1"># zero), for gaze-on-screen</span>
+                                                  <span class="c1"># coordinates, this can be</span>
+                                                  <span class="c1"># for example: &quot;top-left&quot; or</span>
+                                                  <span class="c1"># &quot;center&quot;. For virtual</span>
+                                                  <span class="c1"># reality this could be,</span>
+                                                  <span class="c1"># amongst others, spherical</span>
+                                                  <span class="c1"># coordinates.</span>
+                                                  <span class="c1"># (string)</span>
 
-        <span class="c1"># Screen size in cm (for example `[47.2, 29.5]` for a screen of</span>
-        <span class="c1">#  47.2-length by 29.5-height cm), if no screen use `n/a`</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;ScreenSize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># array of numbers or string &quot;n/a&quot;</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;ScreenSize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Screen size in cm, excluding potential</span>
+                                      <span class="c1"># screen borders (for example</span>
+                                      <span class="c1"># [47.2, 29.5] for a screen of 47.2-width</span>
+                                      <span class="c1"># by 29.5-height cm), if no screen use</span>
+                                      <span class="c1"># n/a.</span>
+                                      <span class="c1"># (array of numbers or &quot;n/a&quot;)</span>
 
-        <span class="c1"># Screen resolution in pixel (for example `[1920, 1200]` for a screen</span>
-        <span class="c1">#  of 1920-length by 1080-height pixels), if no screen use `n/a`</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;ScreenResolution&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># array of numbers</span>
-                                                 <span class="c1">#  or string &quot;n/a&quot;</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;ScreenResolution&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Screen resolution in pixel (for</span>
+                                            <span class="c1"># example [1920, 1200] for a screen</span>
+                                            <span class="c1"># of 1920-width by 1080-height</span>
+                                            <span class="c1"># pixels), if no screen use n/a.</span>
+                                            <span class="c1"># (array of integers or &quot;n/a&quot;)</span>
 
-        <span class="c1"># Screen distance in cm (e.g `60` for a screen distance of 60 cm), if</span>
-        <span class="c1">#  no screen use `&quot;n/a&quot;`. For MRI, it corresponds to the distance</span>
-        <span class="c1">#  between the head-coil mirror to the projection screen for example</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;ScreenDistance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># array of numbers</span>
-                                               <span class="c1">#  or string &quot;n/a&quot;</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;ScreenDistance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Distance between the participant&#39;s</span>
+                                          <span class="c1"># eye and the screen. If no screen</span>
+                                          <span class="c1"># was used, use n/a.</span>
+                                          <span class="c1"># (numbers or &quot;n/a&quot;)</span>
 
         <span class="c1">#----------------------------------------------------------------------</span>
         <span class="c1"># RECOMMENDED</span>
         <span class="c1">#----------------------------------------------------------------------</span>
-        <span class="c1"># List of included events with message specifications.</span>
-        <span class="c1">#  For example, if fixation markers from the EyeLink are included add:</span>
-        <span class="c1">#  `[[Start of fixation: “SFIX”], [End of fixation: “EFIX”]]`.</span>
-        <span class="c1">#  If no events are included write `None`</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;IncludedEyeMovementEvents&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># object of objects</span>
-                                                          <span class="c1">#  or string &quot;n/a&quot;</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;IncludedEyeMovementEvents&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># List of included events</span>
+                                                     <span class="c1"># with message</span>
+                                                     <span class="c1"># specifications.</span>
+                                                     <span class="c1"># For example, if fixation</span>
+                                                     <span class="c1"># markers from the EyeLink</span>
+                                                     <span class="c1"># are included add:</span>
+                                                     <span class="c1"># [[Start of fixation:</span>
+                                                     <span class="c1"># “SFIX”],</span>
+                                                     <span class="c1"># [End of fixation:</span>
+                                                     <span class="c1"># “EFIX”]]`.</span>
+                                                     <span class="c1"># (object of objects)</span>
 
-        <span class="c1"># Name the event detection algorithm. If a detection algorithm is used,</span>
-        <span class="c1">#  settings SHOULD be present in `DetectionAlgorithmSettings`</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;DetectionAlgorithm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;StartMessage&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># The message sent to the eye tracker</span>
+                                        <span class="c1"># to indicate the start of each trial.</span>
+                                        <span class="c1"># Could be the start of the</span>
+                                        <span class="c1"># presentation of an image, word,</span>
+                                        <span class="c1"># video, and so on</span>
+                                        <span class="c1"># (string)</span>
 
-        <span class="c1"># List of parameter settings used in the `DetectionAlgorithm` for eye</span>
-        <span class="c1">#  movement events</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;DetectionAlgorithmSettings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># object of objects</span>
-                                                           <span class="c1">#  or string &quot;n/a&quot;</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;EndMessage&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="kc">None</span> <span class="c1"># The message sent to the eye tracker to</span>
+                                       <span class="c1"># indicate the end of each trial</span>
+                                       <span class="c1"># presentation. Could be the end of the</span>
+                                       <span class="c1"># presentation of an image, word, video,</span>
+                                       <span class="c1"># and so on</span>
+                                       <span class="c1"># (string)</span>
 
-        <span class="c1"># The message sent to the eye tracker to indicate the start of each</span>
-        <span class="c1">#  trial. Could be the start of the presentation of an image, word,</span>
-        <span class="c1">#  video, and so on</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;StartMessage&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;CalibrationType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Description of the calibration</span>
+                                           <span class="c1"># procedure. For example the &quot;H3&quot;</span>
+                                           <span class="c1"># for horizontal calibration with 3</span>
+                                           <span class="c1"># positions or &quot;HV9&quot; for horizontal</span>
+                                           <span class="c1"># and vertical calibration with 9</span>
+                                           <span class="c1"># positions, or one point</span>
+                                           <span class="c1"># calibration.</span>
+                                           <span class="c1"># (string)</span>
 
-        <span class="c1"># The message sent to the eye tracker to indicate the end of each trial</span>
-        <span class="c1">#  presentation. Could be the end of the presentation of an image,</span>
-        <span class="c1">#  word, video, and so on</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;EndMessage&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;CalibrationUnit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Unit of &quot;CalibrationPosition&quot;.</span>
+                                           <span class="c1"># Must be one of:</span>
+                                           <span class="c1"># &quot;pixel&quot;, &quot;mm&quot;, &quot;cm&quot;.</span>
+                                           <span class="c1"># (string)</span>
 
-        <span class="c1"># When the paradigm includes pressing a key, message identifying this</span>
-        <span class="c1">#  should be included to the sidecar JSON file</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;KeyPressMessage&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;CalibrationPosition&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Provide a list of X/Y</span>
+                                               <span class="c1"># coordinates in the</span>
+                                               <span class="c1"># CalibrationUnit. For example,</span>
+                                               <span class="c1"># using 5 positions calibration</span>
+                                               <span class="c1"># presented on an HD screen, it</span>
+                                               <span class="c1"># could be [[960,50],[960,540],</span>
+                                               <span class="c1"># [960,1030],[50,540],</span>
+                                               <span class="c1"># [1870,540]].</span>
+                                               <span class="c1"># (array of arrays)</span>
 
-        <span class="c1"># Description of the calibration procedure. For example the `&quot;H3&quot;` for</span>
-        <span class="c1">#  horizontal calibration with 3 positions or `&quot;HV9&quot;` for horizontal</span>
-        <span class="c1">#  and vertical calibration with 9 positions, or one point calibration</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;CalibrationType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;MaximalCalibrationError&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Maximal calibration error</span>
+                                                   <span class="c1"># in degree. (number)</span>
 
-        <span class="c1"># Unit of `CalibrationPosition`: `&quot;pixel&quot;`, `&quot;mm&quot;` or `&quot;cm&quot;`</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;CalibrationUnit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;AverageCalibrationError&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Average calibration error</span>
+                                                   <span class="c1"># in visual degree.</span>
+                                                   <span class="c1"># (number)</span>
 
-        <span class="c1"># Provide a list of X/Y coordinates in the `CalibrationUnit`.</span>
-        <span class="c1">#  For example, using 5 positions calibration presented on an HD</span>
-        <span class="c1">#  screen, it could be</span>
-        <span class="c1">#  `[[960,50],[960,540],[960,1030],[50,540],[1870,540]]`</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;CalibrationPosition&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># array of number</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;CalibrationList&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># List of lists including</span>
+                                           <span class="c1"># information for each calibration.</span>
+                                           <span class="c1"># This list includes the calibration</span>
+                                           <span class="c1"># type, recorded eye, maximal</span>
+                                           <span class="c1"># calibration error, average</span>
+                                           <span class="c1"># calibration error, and time</span>
+                                           <span class="c1"># relative to the first event of the</span>
+                                           <span class="c1"># event file.</span>
+                                           <span class="c1"># (array of arrays)</span>
 
-        <span class="c1"># Maximal calibration error in visual degree</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;MaximalCalibrationError&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># number</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;RecordedEye&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Specification for which eye was</span>
+                                       <span class="c1"># tracked.</span>
+                                       <span class="c1"># Must be one of:</span>
+                                       <span class="c1"># &quot;left&quot;, &quot;right&quot;, &quot;both&quot;.</span>
+                                       <span class="c1"># (string)</span>
 
-        <span class="c1"># Average calibration error in visual degree</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;AverageCalibrationError&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># number</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;EyeCameraSettings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># A field to store any settings</span>
+                                             <span class="c1"># that influence the resolution</span>
+                                             <span class="c1"># and quality of the eye imagery.</span>
+                                             <span class="c1"># Autowhitebalance? Changes in</span>
+                                             <span class="c1"># sharpness?</span>
+                                             <span class="c1"># (object of objects)</span>
 
-        <span class="c1"># List of lists including information for each calibration. This list</span>
-        <span class="c1">#  includes the calibration type, recorded eye, maximal calibration</span>
-        <span class="c1">#  error, average calibration error, and time relative to the first</span>
-        <span class="c1">#  event of the event file</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;CalibrationList&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># object of object</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;FeatureDetectionSettings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># A place to store</span>
+                                                    <span class="c1"># arbitrary information</span>
+                                                    <span class="c1"># related to feature</span>
+                                                    <span class="c1"># detection. For example</span>
+                                                    <span class="c1"># Minimum/maximum pupil</span>
+                                                    <span class="c1"># size.</span>
+                                                    <span class="c1"># (object of objects)</span>
 
-        <span class="c1"># Specification for which eye was tracked</span>
-        <span class="c1">#  (`&quot;Left&quot;`, `&quot;Right&quot;`, `&quot;Both&quot;`)</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;RecordedEye&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;GazeMappingSettings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># A place to store arbitrary</span>
+                                               <span class="c1"># information related to gaze</span>
+                                               <span class="c1"># mapping. For example, if there</span>
+                                               <span class="c1"># was a threshold on pupil</span>
+                                               <span class="c1"># confidence REQUIRED for gaze</span>
+                                               <span class="c1"># mapping, one could store that</span>
+                                               <span class="c1"># information here.</span>
+                                               <span class="c1"># (object of objects)</span>
 
-        <span class="c1"># A field to store any settings that influence the resolution and</span>
-        <span class="c1">#  quality of the eye imagery. Autowhitebalance? Changes in sharpness?</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;EyeCameraSettings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># object of object</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;RawDataFilters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Filter settings applied to</span>
+                                          <span class="c1"># eye-movement raw data. For example</span>
+                                          <span class="c1"># Eyelink trackers typically</span>
+                                          <span class="c1"># automatically filter the raw data.</span>
+                                          <span class="c1"># (string)</span>
 
-        <span class="c1"># A place to store arbitrary information related to feature detection.</span>
-        <span class="c1">#  For example Minimum/maximum pupil size.</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;FeatureDetectionSettings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># object of object</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;ScreenRefreshRate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Refresh rate of the screen</span>
+                                             <span class="c1"># (when used), in Hertz</span>
+                                             <span class="c1"># (equivalent to frames per</span>
+                                             <span class="c1"># second, &quot;FPS&quot;).</span>
+                                             <span class="c1"># (number)</span>
 
-        <span class="c1"># A place to store arbitrary information related to gaze mapping.</span>
-        <span class="c1">#  For example, if there was a threshold on pupil confidence required</span>
-        <span class="c1">#  for gaze mapping, one could store that information here</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;GazeMappingSettings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># object of object</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;ScreenAOIDefinition&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># A description of the shape of</span>
+                                               <span class="c1"># the Screen AOIs and what</span>
+                                               <span class="c1"># coordinates are used.</span>
+                                               <span class="c1"># [&quot;square&quot;, [&quot;x_start&quot;,</span>
+                                               <span class="c1"># &quot;x_stop&quot;, &quot;y_start&quot;,</span>
+                                               <span class="c1"># &quot;y_stop&quot;]]</span>
+                                               <span class="c1"># Other options:</span>
+                                               <span class="c1"># &quot;custom&quot;/&quot;circle&quot;/&quot;triangle&quot;,</span>
+                                               <span class="c1"># [[&quot;x&quot;, &quot;y&quot;], [&quot;x&quot;, &quot;y&quot;],</span>
+                                               <span class="c1"># [&quot;x&quot;, &quot;y&quot;], and so on.].</span>
+                                               <span class="c1"># (object of objects)</span>
 
-        <span class="c1"># Filter settings applied to eye-movement raw data.</span>
-        <span class="c1">#  For example Eyelink trackers typically automatically filter the raw</span>
-        <span class="c1">#  data.</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;RawDataFilters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;PupilFitMethod&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># The method employed for fitting the</span>
+                                          <span class="c1"># pupil, for example &quot;centre-of-mass&quot;</span>
+                                          <span class="c1"># or &quot;ellipse&quot;. If &quot;centre-of-mass&quot;</span>
+                                          <span class="c1"># or &quot;ellipse&quot; method is used, it is</span>
+                                          <span class="c1"># RECOMMENDED to use these exact</span>
+                                          <span class="c1"># labels.</span>
+                                          <span class="c1"># (string)</span>
 
-        <span class="c1"># Refresh rate of the screen (when used), in Hertz</span>
-        <span class="c1">#  For example, `60` for 60 Hz.</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;ScreenRefreshRate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># number</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;StartTime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Eye-tracking timestamp corresponding to</span>
+                                     <span class="c1"># the onset (start) of the run.</span>
+                                     <span class="c1"># (number)</span>
 
-        <span class="c1"># Define, what shape are the AOIs and what coordinates are used.</span>
-        <span class="c1">#  `[“square”,[“x_start”, “x_stop”, “y_start”, “y_stop”]]`</span>
-        <span class="c1">#  Other options: `“custom”/”circle”/”triangle”,</span>
-        <span class="c1">#  [[“x”,”y”],[“x”,”y”],[“x”,”y”],and so on.]`</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;AOIDefinition&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># object of object</span>
-
-        <span class="c1"># The method employed for fitting the pupil:</span>
-        <span class="c1">#  `&quot;centre-of-mass&quot;` or `&quot;ellipse&quot;`.</span>
-        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;PupilFitMethod&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># string</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;StopTime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Eye-tracking timestamp corresponding to</span>
+                                    <span class="c1"># the offset (stop) of the run.</span>
+                                    <span class="c1"># (number)</span>
 
         <span class="k">return</span> <span class="n">settings</span>
 
-<div class="viewcode-block" id="StandardisationProcess.create_settingsFile"><a class="viewcode-back" href="../../2_SettingsFile.html#BIDSification_eyetrackingData.StandardisationProcess.create_settingsFile">[docs]</a>    <span class="k">def</span> <span class="nf">create_settingsFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="StandardisationProcess.create_settingsFile"><a class="viewcode-back" href="../../3.5_SettingsFile.html#BIDSification_eyetrackingData.StandardisationProcess.create_settingsFile">[docs]</a>    <span class="k">def</span> <span class="nf">create_settingsFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Create an setting file in the directory</span>
@@ -719,7 +876,7 @@
 
         <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">Extract_settings_jsonFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">old_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">extract_settings_jsonFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">old_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Process a given json file to extract the settings</span>
@@ -754,7 +911,7 @@
 
         <span class="k">return</span> <span class="n">settings</span>
 
-    <span class="k">def</span> <span class="nf">Extract_settings_infoFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">infofilesname</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">extract_settings_infoFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">infofilesname</span><span class="p">,</span>
                                    <span class="n">list_settings</span><span class="p">,</span> <span class="n">old_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;</span>
@@ -806,7 +963,7 @@
 
         <span class="k">return</span> <span class="n">settings</span>
 
-    <span class="k">def</span> <span class="nf">Check_required_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check_required_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Check that all the required settings are filled.</span>
@@ -845,7 +1002,212 @@
 
         <span class="k">return</span> <span class="p">[]</span>
 
-    <span class="k">def</span> <span class="nf">Extract_events_tsvFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">old_events</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">settingsEvents_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infofilesname</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Initialize the events</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        infofilesname: str</span>
+<span class="sd">            Name of the file containing the information on the files to be</span>
+<span class="sd">            BIDSified</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        eventsJSON: list</span>
+<span class="sd">            A dictionary containing the events in the events files</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Open the information file</span>
+        <span class="n">infoFiles</span> <span class="o">=</span> <span class="n">open_file</span><span class="p">(</span><span class="n">infofilesname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dirpath</span><span class="p">)</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">infoFiles</span><span class="p">:</span>
+
+            <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;filepath&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;eventsfilename&#39;</span><span class="p">]:</span>
+                <span class="n">eventsfile</span> <span class="o">=</span> <span class="n">open_file</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;eventsfilename&#39;</span><span class="p">],</span> <span class="n">filepath</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">eventsfile</span><span class="p">:</span>
+                    <span class="n">events</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="n">settingsEvents</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="p">)</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">e</span><span class="o">!=</span><span class="s2">&quot;trial&quot;</span><span class="p">:</span>
+                    <span class="n">settingsEvents</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Description&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">settingsEvents</span>
+
+<div class="viewcode-block" id="StandardisationProcess.create_settingsEvents"><a class="viewcode-back" href="../../3.6_SettingsEvents.html#BIDSification_eyetrackingData.StandardisationProcess.create_settingsEvents">[docs]</a>    <span class="k">def</span> <span class="nf">create_settingsEvents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infofilesname</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create an event settings file in the directory.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        infofilesname: str</span>
+<span class="sd">            Name of the file containing the information on the files to be</span>
+<span class="sd">            BIDSified</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">settingsEvents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingsEvents_init</span><span class="p">(</span><span class="n">infofilesname</span><span class="p">)</span>
+
+        <span class="c1"># save the settings</span>
+        <span class="n">save_file</span><span class="p">(</span><span class="n">settingsEvents</span><span class="p">,</span> <span class="s1">&#39;settingsEvents.json&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dirpath</span><span class="p">)</span>
+
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;The file </span><span class="si">%s</span><span class="s2">/settingsEvents.json &quot;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">dirpath</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;has just been created </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;Before continuing, please complete it with &quot;</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;the correct information &quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">check_settingsEvents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">infofilesname</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Check an information file on all the data files present in the</span>
+<span class="sd">        directory</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            Name of the file containing the information on the files to be</span>
+<span class="sd">            BIDSified</span>
+<span class="sd">        infofilesname: str</span>
+<span class="sd">            Name of the file containing the information on the files to be</span>
+<span class="sd">            BIDSified</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Open the information file</span>
+        <span class="n">infoFiles</span> <span class="o">=</span> <span class="n">open_file</span><span class="p">(</span><span class="n">infofilesname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dirpath</span><span class="p">)</span>
+
+        <span class="c1">#----------------------------------------------------------------------</span>
+        <span class="c1"># check the list of events that should be present in the settingsEvents</span>
+        <span class="c1"># file</span>
+        <span class="c1">#----------------------------------------------------------------------</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">infoFiles</span><span class="p">:</span>
+
+            <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;filepath&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;eventsfilename&#39;</span><span class="p">]:</span>
+                <span class="n">eventsfile</span> <span class="o">=</span> <span class="n">open_file</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;eventsfilename&#39;</span><span class="p">],</span> <span class="n">filepath</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">eventsfile</span><span class="p">:</span>
+                    <span class="n">events</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">events</span><span class="p">))</span>
+        <span class="k">if</span> <span class="s1">&#39;trial&#39;</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+            <span class="n">events</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;trial&#39;</span><span class="p">)</span>
+        <span class="c1">#----------------------------------------------------------------------</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="p">)</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+
+            <span class="c1">#------------------------------------------------------------------</span>
+            <span class="c1"># Creating a list of potential settingsEvents</span>
+            <span class="c1">#------------------------------------------------------------------</span>
+            <span class="n">settingsEventsPotential</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>
+                <span class="c1"># check if filename is file</span>
+                <span class="n">path_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+                <span class="n">filename_is_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path_file</span><span class="p">)</span>
+
+                <span class="c1"># add filename to the potential settingsEvents</span>
+                <span class="k">if</span> <span class="n">filename_is_file</span><span class="p">:</span>
+                    <span class="n">settingsEventsPotential</span> <span class="o">=</span> <span class="p">[</span><span class="n">filename</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># add all .json files to the potential infoFiles</span>
+                <span class="n">list_files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirpath</span><span class="p">)</span>
+                <span class="c1">#  f.split(&#39;.&#39;)[-1] is the file format</span>
+                <span class="n">settingsEventsPotential</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">list_files</span>
+                                          <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;json&#39;</span><span class="p">]</span>
+            <span class="c1">#------------------------------------------------------------------</span>
+
+            <span class="n">settingsEvents</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">settingsEventsPotential</span><span class="p">)</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+
+                <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">settingsEventsPotential</span><span class="p">:</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">settingsEvents</span><span class="p">:</span>
+
+                        <span class="c1"># open settingsEvents potential</span>
+                        <span class="n">settingsEvents_</span> <span class="o">=</span> <span class="n">open_file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dirpath</span><span class="p">)</span>
+
+                        <span class="n">list_events</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">settingsEvents_</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">settingsEvents_</span><span class="p">[</span><span class="n">e</span><span class="p">])</span><span class="o">==</span><span class="nb">dict</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="s2">&quot;Description&quot;</span> <span class="ow">in</span> <span class="n">settingsEvents_</span><span class="p">[</span><span class="n">e</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                                    <span class="n">list_events</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_events</span><span class="p">)</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+
+                            <span class="n">e_</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">events</span> <span class="k">if</span> <span class="n">e</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">list_events</span><span class="p">]</span>
+
+                            <span class="c1"># check if all events are present in settingsEvents</span>
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">e_</span><span class="p">)</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+                                <span class="n">error</span> <span class="o">=</span> <span class="s1">&#39;missingEvents&#39;</span>
+
+                            <span class="n">settingsEvents</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+
+            <span class="c1"># check if settingsEvents exist</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">settingsEvents</span><span class="p">:</span>
+                <span class="n">error</span> <span class="o">=</span> <span class="s1">&#39;noSettingsEventsFiles&#39;</span>
+
+            <span class="c1"># returns an error if settingsEvents is not good</span>
+            <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">settingsEventsError</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">settingsEvents</span><span class="p">,</span> <span class="n">e_</span><span class="p">)</span>
+
+            <span class="c1"># change self.settingsEventsfilesname if settingsEvents is good</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settingsEventsfilename</span> <span class="o">=</span> <span class="n">settingsEvents</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settingsEventsfilename</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+    <span class="k">def</span> <span class="nf">extract_settingsEvents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">old_settingsEvents</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Process a given json file to extract the settings</span>
+<span class="sd">        and fill-in the corresponding settings field</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            Name of the file containing the events settings in the BIDSified</span>
+<span class="sd">            data</span>
+<span class="sd">        old_settingsEvents: dict or None (default None)</span>
+<span class="sd">            A dictionary containing the settings for the events in the</span>
+<span class="sd">            experiment</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        settingsEvents: dict</span>
+<span class="sd">            A dictionary containing the settings for the events in the</span>
+<span class="sd">            experiment</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="n">old_settingsEvents</span><span class="p">:</span>
+            <span class="n">settingsEvents</span> <span class="o">=</span> <span class="n">old_settingsEvents</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">settingsEvents</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># open new settings</span>
+        <span class="n">new_settingsEvents</span> <span class="o">=</span> <span class="n">open_file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dirpath</span><span class="p">)</span>
+
+        <span class="c1"># completes the settings with the new settings</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">new_settingsEvents</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">new_settingsEvents</span><span class="p">[</span><span class="n">s</span><span class="p">]:</span>
+                <span class="n">settingsEvents</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_settingsEvents</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">settingsEvents</span>
+
+
+    <span class="k">def</span> <span class="nf">extract_events_tsvFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">old_events</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Extract the trial events from the tsv file</span>
@@ -902,7 +1264,7 @@
     <span class="c1">#--------------------------------------------------------------------------</span>
     <span class="c1"># infoParticipants</span>
     <span class="c1">#--------------------------------------------------------------------------</span>
-    <span class="k">def</span> <span class="nf">Extract_infoParticipants</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">list_infoparticipants</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">extract_infoParticipants</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">list_infoparticipants</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Extract the participant informations from the tsv file</span>

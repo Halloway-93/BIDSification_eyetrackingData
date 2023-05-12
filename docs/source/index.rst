@@ -1,48 +1,28 @@
-BIDSification Data
-=============================
+==============================
+BIDSification eyetracking Data
+==============================
 
-This python package allows you to automatically organize your eye data in a BIDS format.
-
-To install this package, please use the following command:
-
-``pip install git+https://github.com/chloepasturel/BIDSification_eyetrackingData.git``
-
-For more details, we recommend that you consult the BIDS documentation specific to Eye-Tracking.
-
-The BIDSifier data looks like this:
-
-| **dataset/**
-|    **participants.tsv**
-|    **sub-** ``<label>`` **/**
-|       *[ ses-* ``<label>`` */ ]*
-|          ``<datatype>`` **/**
-|             |sub| |ses| |task| |acq| |run| **_eyetrack.** ``<datatype>``
-|             |sub| |ses| |task| |acq| |run| **_eyetrack.json**
-|             |sub| |ses| |task| |acq| |run| **_eyetrack.tsv**
-|             |sub| |ses| |task| |acq| |run| **_events.json**
-|             |sub| |ses| |task| |acq| |run| **_events.tsv**
-
-.. |sub| replace:: **sub-** ``<label>``
-.. |ses| replace:: *[* *_ses-* ``<label>`` *]*
-.. |task| replace:: *[* *_task-* ``<label>`` *]*
-.. |acq| replace:: *[* *_acq-* ``<label>`` *]*
-.. |run| replace:: *[* *_run-* ``<index>`` *]*
+This python package allows you to automatically organize your eye data in a `BIDS format <https://bids.neuroimaging.io/>`_.
+|br|
+For more details, we recommend that you consult the `BIDS documentation specific to Eye-Tracking <https://bids-specification--1128.org.readthedocs.build/en/1128/modality-specific-files/eye-tracking.html>`_.
 
 
-To do this you will need to add two important files to your non-range raw data folder:
+.. |br| raw:: html
 
-- :doc:`1_InfoFile` - containing information about the data files in the directory
+   <br>
 
-- :doc:`2_SettingsFile` - containing the general settings for the task
 
-you can then BIDify your data (see :doc:`3_BIDSification`)
+.. warning:: As this extension to BIDS is still under development, it is likely that changes will be made to this package in the future.
 
+-----------------
+Table of Contents
+-----------------
 
 .. toctree::
-   :hidden:
+   :includehidden:
+   :maxdepth: 3
    
-   1_InfoFile
-   2_SettingsFile
-   3_BIDSification
-   
-   
+   self
+   1_To-install-this-package
+   2_The-BIDS-eyetracking-data
+   3_Conversion-of-data-to-BIDS-format

@@ -11,7 +11,7 @@ setup(
     packages=find_packages(),
     author="",
     author_email="",
-    description="",
+    description="allows automatic arrangement of eye data in BIDS format",
     long_description=open('README.md').read(),
     include_package_data=True,
     url='',

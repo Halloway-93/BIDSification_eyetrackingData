@@ -1,0 +1,141 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Data standardisation"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "To standardise your data you can use this class:"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {
+    "raw_mimetype": "text/restructuredtext"
+   },
+   "source": [
+    ".. autoclass:: BIDSification_eyetrackingData.DataStandardisation\n",
+    "   :noindex:"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {
+    "raw_mimetype": "text/html"
+   },
+   "source": [
+    "<br><br>"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {
+    "raw_mimetype": "text/restructuredtext"
+   },
+   "source": [
+    ".. warning::\n",
+    "   | A new folder containing your BIDSified data will be created, but the :ref:`participants.json<participants.json>` file will not be complete. **You will have to complete it manually**"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "**exemple of code:**"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "001\n",
+      "002\n",
+      "002\n"
+     ]
+    }
+   ],
+   "source": [
+    "import BIDSification_eyetrackingData as BIDS\n",
+    "\n",
+    "#------------------------------------------------------------------------------\n",
+    "# Parameters\n",
+    "#------------------------------------------------------------------------------\n",
+    "\n",
+    "path_oldData = './data' # Path of the data directory to BIDSified\n",
+    "path_newData = './dataBIDS' # Path of the new BIDS data directory\n",
+    "\n",
+    "# Name of the file describing the dataset\n",
+    "datasetdescriptionfilename = 'dataset_description.json'\n",
+    "# Name of the file containing the information on the files to be BIDSified\n",
+    "infofilesname = 'infoFiles.tsv'\n",
+    "# Name of the file containing the information on the files to be BIDSified\n",
+    "settingsfilename = 'settings.json'\n",
+    "# Name of the file containing the events settings in the BIDSified data\n",
+    "settingsEventsfilename = 'settingsEvents.json'\n",
+    "\n",
+    "\n",
+    "eyetracktype = 'Eyelink' # Name of the type of eyetrackeur used\n",
+    "dataformat = '.asc' # Data format\n",
+    "\n",
+    "# List of events to be extracted from the trials\n",
+    "saved_events = {\"StimulusOn\": {\"Description\": \"appearance of the fixation point\"},\n",
+    "                \"StimulusOff\": {\"Description\": \"disappearance of the fixation point\"},\n",
+    "                \"TargetOn\": {\"Description\": \"appearance of the moving target\"},\n",
+    "                \"TargetOff\": {\"Description\": \"disappearance of the moving target\"}}\n",
+    "\n",
+    "StartMessage= 'TRIALID'# Message marking the start of the trial\n",
+    "EndMessage= 'TRIAL OK' # Message marking the end of the trial\n",
+    "\n",
+    "\n",
+    "\n",
+    "#------------------------------------------------------------------------------\n",
+    "# to apply the function:\n",
+    "#------------------------------------------------------------------------------\n",
+    "BIDS.DataStandardisation(path_oldData=path_oldData,\n",
+    "                         path_newData=path_newData,\n",
+    "                         datasetdescriptionfilename=datasetdescriptionfilename,\n",
+    "                         infofilesname=infofilesname,\n",
+    "                         settingsfilename=settingsfilename,\n",
+    "                         settingsEventsfilename=settingsEventsfilename,\n",
+    "                         eyetracktype=eyetracktype,\n",
+    "                         dataformat=dataformat,\n",
+    "                         saved_events=saved_events,\n",
+    "                         StartMessage=StartMessage,\n",
+    "                         EndMessage=EndMessage);"
+   ]
+  }
+ ],
+ "metadata": {
+  "celltoolbar": "Raw Cell Format",
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.6"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

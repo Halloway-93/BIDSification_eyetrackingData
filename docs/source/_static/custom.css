@@ -38,6 +38,11 @@ div.body {
     max-width: 1280px;
 }
 
+
+.line-block {
+  margin-left: 2em!important;
+}
+
 /* ----------------------------------------------------------------- */
 
 div.document {
@@ -68,6 +73,25 @@ iframe[Attributes Style] {
 }
 
 /* -- code --------------------------------------------------------- */
+span.sig-prename.descclassname, span.sig-name.descname {
+    color: #1E1E1E;
+}
+
+span.sig-prename.descclassname {
+   font-size: 0.9em;
+}
+
+span.sig-name.descname {
+   font-size: 1.2em;
+}
+
+.sig {
+   margin-top: 2em;
+}
+
+div[class*="highlight-"] {
+  max-width: 752px;
+}
 /*
 tt.descname, tt.descclassname, code.descname, code.descclassname {
     font-size: 1.2em;
@@ -81,8 +105,6 @@ code.xref:hover {
 */
 /* ----------------------------------------------------------------- */
 
-
-
 em {
     font-style: normal;
     font-size: 0.9em;
@@ -94,16 +116,22 @@ em {
 
 /* -- admonition --------------------------------------------------- */
 div.admonition {
-    margin: 0px 0px;
+    margin: 30px 0px;
     padding: 10px 30px;
+    width: 90%;
+    max-width: 752px;
 }
 
 p.admonition-title{
-    color:#C80000;
     margin: 0px 0px 0px -15px!important;
-    font-size: 1em!important;
+    font-size: 1.1em!important;
     font-weight: bold!important;
+} /*color:#C80000;*/
+
+p.admonition-title::after {
+  content: "";
 }
+
 /* ----------------------------------------------------------------- */
 
 div.note {
@@ -119,27 +147,59 @@ div.warning {
 /* -- code notebook ------------------------------------------------- */
 div.nbinput.container, div.nboutput.container {
   width: 100%;
-  max-width: 666px;
+  max-width: 752px;
 }
+
 div.output_area {
   max-height: 333px;
+  background: #FFFABF;
+  margin: 10px auto;
+  border: 1px solid #FFF480;
 }
+
+div.output_area img {
+  padding: 0px !important;
+  width: auto !important;
+  max-width: 712px !important;
+}
+
+div.output_area.stderr {
+  border: none !important;
+}
+
 /* ----------------------------------------------------------------- */
 
 
 /* -- table --------------------------------------------------------- */
 table.docutils td, table.docutils th {
-  min-width: 100px;
+  min-width: auto;
   vertical-align: top;
   font-size: 13px;
 }
 
+div.warning th {
+   background-color: #FFA3A3;
+}
+
+div.warning td, div.warning th {
+   border: 1px solid #FFA3A4;
+   padding: 1em 0.7em;
+}
+
+div.warning table {
+   width: 95%;
+   box-shadow: none;
+   background: #FFC0C0;
+}
 th {
   background-color: #ccc;
 }
 
 table.docutils {
-   width: 100%;
+  width: 98%;
+  padding: 10px 30px;
+  max-width: 812px;
+  margin: 30px 0px;
 }
 
 table.field-list th {
