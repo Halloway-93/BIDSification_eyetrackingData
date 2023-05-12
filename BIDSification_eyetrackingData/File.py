@@ -4,6 +4,8 @@
 import os
 import json
 import csv
+import gzip
+
 
 def open_file(filename, filepath):
 
@@ -26,7 +28,7 @@ def open_file(filename, filepath):
     # file format
     fileformat = filename.split('.')[-1]
 
-    if fileformat in ['json', 'tsv', 'asc']:
+    if fileformat in ['json', 'tsv', 'csv', 'asc']:
 
         if filepath:
             filename = os.path.join(filepath, filename)
@@ -37,8 +39,8 @@ def open_file(filename, filepath):
         if fileformat=='json':
             file_ = json.load(f)
 
-        # open file .tsv
-        elif fileformat=='tsv':
+        # open file .tsv, .csv
+        elif fileformat in ['tsv', 'csv']:
             from copy import copy
             file_ = copy(list(csv.DictReader(f, delimiter=" ")))
 
@@ -70,7 +72,6 @@ def save_file(data, filename, filepath):
 
     # file format
     fileformat = filename.split('.')[-1]
-
     if fileformat in ['json', 'tsv']:
 
         filename = os.path.join(filepath, filename)
@@ -88,3 +89,12 @@ def save_file(data, filename, filepath):
 
         f.close()
 
+    elif fileformat=='gz':
+
+        filename = os.path.join(filepath, filename)
+        f = gzip.open(filename, 'wt')
+        file_ = csv.DictWriter(f, fieldnames=data[0].keys(), delimiter=' ')
+        file_.writeheader()
+        file_.writerows(data)
+
+        f.close()

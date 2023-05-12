@@ -1,0 +1,4 @@
+filename filepath eventsfilename participant_id ses task acq run time GUID
+LB.asc  LB.tsv 002 001    2017-09-20_151043 "5b2ee5b9-549b-4624-88b9-897295f3e5a0 2017-09-20_151043"
+OP.asc  OP.tsv 001     2017-10-26_121823 "3aabe8bb-b5dd-4934-aeaa-cda1e0026609 2017-10-26_121823"
+AM.asc  AM.tsv 002 002    2017-10-23_100057 "5b2ee5b9-549b-4624-88b9-897295f3e5a0 2017-09-20_151043"

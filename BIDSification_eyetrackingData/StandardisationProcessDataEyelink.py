@@ -32,7 +32,7 @@ class StandardisationProcessDataEyelink:
     #--------------------------------------------------------------------------
     # Settings
     #--------------------------------------------------------------------------
-    def Extract_settings_ascFile(self, filename, filepath, old_settings=None):
+    def extract_settings_ascFile(self, filename, filepath, old_settings=None):
 
         '''
         Process a given run file (in .asc format) to extract the settings
@@ -59,7 +59,6 @@ class StandardisationProcessDataEyelink:
             settings = self.process.settings_init()
 
         settings['Manufacturer'] = "SR-Research"
-        settings['DetectionAlgorithm'] = "SR-Research"
 
         # open file asc
         file_asc = open_file(filename, filepath)
@@ -68,6 +67,8 @@ class StandardisationProcessDataEyelink:
         for line in file_asc:
 
             l = line[:-1]
+
+
 
             if '** EYELINK' in l:
                 k = 'ManufacturersModelName'
@@ -89,7 +90,7 @@ class StandardisationProcessDataEyelink:
                 v = l.split('CAMERA: ')[1]
                 settings[k] = v
 
-            if 'DISPLAY_COORDS' in l:
+            if 'GAZE_COORDS' in l:
                 k = 'ScreenResolution'
                 v = [float(l.split(' ')[-2]) +1, float(l.split(' ')[-1]) +1]
                 settings[k] = v
@@ -155,6 +156,31 @@ class StandardisationProcessDataEyelink:
                     elif event=='EBLINK': v = ["End of blink", "EBLINK"]
                     settings[k].append(v)
 
+
+            #------------------------------------------------------------------
+            # StartTime
+            #------------------------------------------------------------------
+            if not settings['StartTime']:
+                l_ = l.split('\t')
+                try:
+                    if int(l_[0]):
+                        k = 'StarTime'
+                        v = int(l_[0])
+                        settings[K] = V
+                except:
+                    pass
+
+            #------------------------------------------------------------------
+            # EndTime
+            #------------------------------------------------------------------
+            l_ = l.split('\t')
+            try:
+                if int(l_[0]):
+                    k = 'EndTime'
+                    v = int(l_[0])
+                    settings[K] = V
+            except:
+                pass
             #------------------------------------------------------------------
             # StartMessage
             #------------------------------------------------------------------
@@ -214,7 +240,7 @@ class StandardisationProcessDataEyelink:
     #--------------------------------------------------------------------------
     # data
     #--------------------------------------------------------------------------
-    def Extract_data_ascFile(self, filename, filepath):
+    def extract_data_ascFile(self, filename, filepath):
 
         '''
         Process a given run file (in .asc format) to extract the data
@@ -331,24 +357,44 @@ class StandardisationProcessDataEyelink:
 
                 if l[0]=='SAMPLES':
 
-                    line_formats = ["time"]
+                    #line_formats = ["time"]
+                    line_formats = ["eye_timestamp"]
 
                     # position data and pupil size
-                    if 'LEFT' in l:
-                        line_formats.extend(["xpl", "ypl", "psl"])
-                    if 'RIGHT' in l:
-                        line_formats.extend(["xpr", "ypr", "psr"])
+
+                    #if 'LEFT' in l:
+                    #    line_formats.extend(["xpl", "ypl", "psl"])
+                    #if 'RIGHT' in l:
+                    #    line_formats.extend(["xpr", "ypr", "psr"])
+
+                    line_formats.extend(["eye1_x_coordinate",
+                                         "eye1_y_coordinate",
+                                         "eye1_pupil_size"])
+                    if 'LEFT' in l and 'RIGHT' in l:
+                        line_formats.extend(["eye2_x_coordinate",
+                                             "eye2_y_coordinate",
+                                             "eye2_pupil_size"])
 
                     # velocity data
                     if 'VEL' in l:
-                        if 'LEFT' in l:
-                            line_formats.extend(["xvl", "yvl"])
-                        if 'RIGHT' in l:
-                            line_formats.extend(["xvr", "yvr"])
+                        #if 'LEFT' in l:
+                        #    #line_formats.extend(["xvl", "yvl"])
+                        #    line_formats.extend(["xvl", "yvl"])
+                        #if 'RIGHT' in l:
+                        #    #line_formats.extend(["xvr", "yvr"])
+                        #    line_formats.extend(["xvr", "yvr"])
+                        #
+                        line_formats.extend(["eye1_x_velocity",
+                                             "eye1_y_velocity"])
+
+                        if 'LEFT' in l and 'RIGHT' in l:
+                            line_formats.extend(["eye2_x_velocity",
+                                                 "eye2_y_velocity"])
 
                     # resolution data
                     if 'RES' in l:
-                        line_formats.extend(["xr", "yr"])
+                        #line_formats.extend(["xr", "yr"])
+                        line_formats.extend(["x_resolution", "y_resolution"])
 
             try:
                 # add line in data
@@ -367,7 +413,7 @@ class StandardisationProcessDataEyelink:
     #--------------------------------------------------------------------------
     # Events
     #--------------------------------------------------------------------------
-    def Extract_events_ascFile(self, filename, filepath, saved_events,
+    def extract_events_ascFile(self, filename, filepath, saved_events,
                                settings=None, old_events=None):
 
         '''
@@ -379,8 +425,11 @@ class StandardisationProcessDataEyelink:
             Name of the data file to be BIDSified
         filepath: str
             Path of the data file to be BIDSified
-        saved_events: list
-            List of events to be extracted from the trials
+        saved_events: dict
+            Dictionary of events to be extracted from trials and their
+            descriptions:
+            ``{"event1": {"Description":{"description of event1"},
+               "event2": {"Description":{"description of event2"}}``
         settings: dict or None (default None)
             A dictionary containing the settings of the experiment
         old_events: list or None (default None)
@@ -389,9 +438,11 @@ class StandardisationProcessDataEyelink:
 
         Returns
         -------
-        events: list
-            A dictionary list for each trial containing the events of
-            those trials
+        events, settingsEvents: list, dict
+            ``events`` is a dictionary list for each trial containing the
+            events of those trials.
+            ``settingsEvents`` is a dictionary containing the settings for the
+            events in the experiment
         '''
 
         if old_events:
@@ -402,28 +453,34 @@ class StandardisationProcessDataEyelink:
         # open file asc
         file_asc = open_file(filename, filepath)
 
+        saved_e = list(saved_events.keys())
+
+        settingsEvents = saved_events
+
         #----------------------------------------------------------------------
         # add event names at saved_events
         #----------------------------------------------------------------------
         for n, e in enumerate(["onset", "duration", "sample", "trial",
                                "eventIdentifier"]):
-            if e not in saved_events:
-                saved_events.insert(n, e)
+            if e not in saved_e:
+                saved_e.insert(n, e)
 
         # add Eye Movement Events
         if settings:
             if settings["IncludedEyeMovementEvents"]:
                 for x in settings["IncludedEyeMovementEvents"]:
-                    if x[1] not in saved_events:
-                        saved_events.append(x[1])
+                    if x[1] not in saved_e:
+                        saved_e.append(x[1])
+                        settingsEvents = {**settingsEvents,
+                                          x[1]: {"Description": x[0]}}
         #----------------------------------------------------------------------
 
 
         # function initializing events_trial
-        def start_events(l, saved_events):
+        def start_events(l, saved_e):
 
             events_trial = {}
-            for e in saved_events:
+            for e in saved_e:
                 events_trial[e] = None
 
             t_start = int(l.split('\t', 1)[1].split(' ')[0])
@@ -452,7 +509,7 @@ class StandardisationProcessDataEyelink:
                 #--------------------------------------------------------------
                 if self.StartMessage in line:
                     # initialise events_trial
-                    events_trial, t_start = start_events(l, saved_events)
+                    events_trial, t_start = start_events(l, saved_e)
                     if not t_0: t_0 = t_start
                     started = True
                 #--------------------------------------------------------------
@@ -467,14 +524,20 @@ class StandardisationProcessDataEyelink:
                         started = False
                         trialend = True
                 else:
-                    if (self.StartMessage in line) or (line==file_asc[-1]):
+                    if self.StartMessage in line:
                         started = True
+                        trialend = True
+                    if line==file_asc[-1]:
+                        started = False
                         trialend = True
                 #--------------------------------------------------------------
 
                 if trialend:
 
-                    t_end = int(l.split('\t', 1)[1].split(' ')[0])
+                    try:
+                        t_end = int(l.split('\t', 1)[1].split(' ')[0])
+                    except:
+                        t_end = int(l.split('\t', 1)[1].split('\t')[0])
                     events_trial["onset"] = (t_start-t_0)/1000
                     events_trial["duration"] = (t_end-t_start)/1000
                     events_trial["trial"] = trial
@@ -501,15 +564,16 @@ class StandardisationProcessDataEyelink:
                     #----------------------------------------------------------
                     if started:
                         # initialise events_trial
-                        events_trial, t_start = start_events(l, saved_events)
+                        events_trial, t_start = start_events(l, saved_e)
                     #----------------------------------------------------------
 
                     trial += 1
                     trialend = False
 
+
             if started:
 
-                for event in saved_events:
+                for event in saved_e:
                     if event in line:
                         if not events_trial[event]:
                             events_trial[event] = []
@@ -541,5 +605,5 @@ class StandardisationProcessDataEyelink:
                             e = int(l[0])
                             events_trial[event].append(e)
 
-        return events
+        return events, settingsEvents
 

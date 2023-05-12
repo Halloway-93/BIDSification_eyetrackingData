@@ -1,0 +1,17 @@
+{
+    "dir_target":{
+        "Description":"direction of the Target"
+    },
+    "num_block":{
+        "Description":"numero of block"
+    },
+    "num_trial":{
+        "Description":"numero of the trial"
+    },
+    "proba":{
+        "Description":"probability that the movement of the target is to the right"
+    },
+    "switch":{
+        "Description":"switch of the probability"
+    }
+}

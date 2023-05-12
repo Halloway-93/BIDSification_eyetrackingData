@@ -24,13 +24,21 @@ class DataStandardisation:
     settingsfilename: str
         Name of the file containing the settings of the data to be
         BIDSified
+    settingsEventsfilename:str
+        Name of the file containing the events settings in the BIDSified
+        data
+    datasetdescriptionfilename: str
+        Name of the file describing the dataset
 
-    eyetacktype: str
+    eyetracktype: str
         Name of the type of eyetackeur used
     dataformat: str
         Data format
-    saved_events: list
-        List of events to be extracted from the trials
+    saved_events: dict
+        dictionary of events to be extracted from trials and their
+        descriptions:
+        ``{"event1": {"Description":{"description of event1"},
+        "event2": {"Description":{"description of event2"}}``
 
     StartMessage: str
         Message marking the start of the trial
@@ -39,8 +47,9 @@ class DataStandardisation:
     '''
 
     def __init__(self, path_oldData, path_newData, infofilesname,
-                 settingsfilename, eyetacktype, dataformat, saved_events,
-                 StartMessage, EndMessage):
+                 settingsfilename, settingsEventsfilename,
+                 datasetdescriptionfilename, eyetracktype,
+                 dataformat, saved_events, StartMessage, EndMessage):
 
         # checks if the directory of the data to be BISDified exists
         if not os.path.isdir(path_oldData):
@@ -48,7 +57,7 @@ class DataStandardisation:
 
 
         # global variable
-        self.eyetacktype = eyetacktype
+        self.eyetracktype = eyetracktype
         self.saved_events = saved_events
         self.settings = None
 
@@ -64,10 +73,16 @@ class DataStandardisation:
         #  per participant
         infos = self.process.sort_infoFiles(infofilesname)
 
+        # Check the event settings file contains all the information about the
+        # events in the events files
+        self.process.check_settingsEvents(settingsEventsfilename,
+                                          infofilesname)
+        settingsEventsfilename = self.process.settingsEventsfilename
+
         # Eyetracking process
         #----------------------------------------------------------------------
         self.process_ET = None
-        if self.eyetacktype=='Eyelink':
+        if self.eyetracktype=='Eyelink':
             self.process_ET = StandardisationProcessDataEyelink(path_oldData,
                                                                 StartMessage,
                                                                 EndMessage)
@@ -112,13 +127,23 @@ class DataStandardisation:
 
             # FILE *_events
             #------------------------------------------------------------------
-            self.create_EventsFile(eventsfilename=f['eventsfilename'], **arg)
+            self.create_EventsFile(eventsfilename=f['eventsfilename'],
+                                 settingsEventsfilename=settingsEventsfilename,
+                                 **arg)
 
         # FILE *_participant.tsv
         #----------------------------------------------------------------------
         self.create_InfoParticipantsFile(infofilesname=infofilesname,
                                          list_settings=infos['participant'],
                                          path=path_newData)
+
+
+        # FILE dataset_description.json
+        #----------------------------------------------------------------------
+        import shutil
+        shutil.copy2(os.path.join(path_oldData, datasetdescriptionfilename),
+                     os.path.join(path_newData, 'dataset_description.json'))
+        #----------------------------------------------------------------------
         #######################################################################
 
     def create_filepath(self, infoFile, path):
@@ -170,10 +195,18 @@ class DataStandardisation:
 
         # Creation of the file names
         filename  = 'sub-'+str(infoFile['participant_id'])
-        filename += '_ses-'+str(infoFile['ses']) if infoFile['ses']  else ''
-        filename += '_task-'+str(infoFile['task']) if infoFile['task'] else ''
-        filename += '_acq-'+str(infoFile['acq']) if infoFile['acq']  else ''
-        filename += '_run-'+str(infoFile['run']) if infoFile['run']  else ''
+        if 'ses' in infoFile.keys():
+            if infoFile['ses']:
+                filename += '_ses-'+str(infoFile['ses'])
+        if 'task' in infoFile.keys():
+            if infoFile['task']:
+                filename += '_task-'+str(infoFile['task'])
+        if 'acq' in infoFile.keys():
+            if infoFile['acq']:
+                filename += '_acq-'+str(infoFile['acq'])
+        if 'run' in infoFile.keys():
+            if infoFile['run']:
+                filename += '_run-'+str(infoFile['run'])
 
         return filename
 
@@ -210,23 +243,23 @@ class DataStandardisation:
 
         # Extract settings in asc files
         if self.process_ET:
-            settings = self.process_ET.Extract_settings_ascFile(filename,
+            settings = self.process_ET.extract_settings_ascFile(filename,
                                                                 filepath,
                                                                 settings)
 
         # Extract settings in json files
         if settingsfilename:
-            settings = self.process.Extract_settings_jsonFile(settingsfilename,
+            settings = self.process.extract_settings_jsonFile(settingsfilename,
                                                               settings)
 
         # Extract settings in tsv files
-        settings = self.process.Extract_settings_infoFiles(filename,
+        settings = self.process.extract_settings_infoFiles(filename,
                                                            infofilesname,
                                                            list_settings,
                                                            settings)
 
         # Check that all the required settings are filled
-        self.process.Check_required_settings(settings)
+        self.process.check_required_settings(settings)
 
         self.settings = settings
 
@@ -254,20 +287,25 @@ class DataStandardisation:
         new_filename = new_filename+'_eyetrack'
 
         # save file .asc
-        if self.eyetacktype=='Eyelink':
+        if self.eyetracktype=='Eyelink':
             import shutil
             shutil.copy2(os.path.join(filepath, filename),
                          os.path.join(new_filepath, new_filename+'.asc'))
 
+        else:
+            fileformat = filename.split('.')[-1]
+            for fileformat in ['tsv', 'csv']:
+                data = open_file(filename, filepath)
+                save_file(data, new_filename+'.tsv.gz', new_filepath)
+
         # Extract data in asc file pour convertir les données en tsv
         if self.process_ET:
-            data = self.process_ET.Extract_data_ascFile(filename, filepath)
+            data = self.process_ET.extract_data_ascFile(filename, filepath)
             # save data
-            save_file(data, new_filename+'.tsv', new_filepath)
-
+            save_file(data, new_filename+'.tsv.gz', new_filepath)
 
     def create_EventsFile(self, filename, eventsfilename, filepath,
-                          new_filename, new_filepath):
+                          settingsEventsfilename, new_filename, new_filepath):
 
         '''
         Creation of a events file
@@ -280,6 +318,9 @@ class DataStandardisation:
             Name of the events file to be BIDSified
         filepath: str
             Path of the data file to be BIDSified
+        settingsEventsfilename: str
+            Name of the file containing the events settings in the BIDSified
+            data
         new_filename: str
             New name of the events file to be BIDSified
         new_filepath: str
@@ -287,20 +328,31 @@ class DataStandardisation:
         '''
 
         events = self.process.events_init()
+        settingsEvents = {}
 
         # Extract Events in asc files
         if self.process_ET:
-            events = self.process_ET.Extract_events_ascFile(filename, filepath,
+            events, settingsEvents = self.process_ET.extract_events_ascFile(
+                                                            filename, filepath,
                                                             self.saved_events,
                                                             self.settings,
                                                             events)
         # Extract Events in tsv files
         if eventsfilename:
-            events = self.process.Extract_events_tsvFile(eventsfilename,
+            events = self.process.extract_events_tsvFile(eventsfilename,
                                                          filepath, events)
 
+            if settingsEventsfilename:
+                settingsEvents = self.process.extract_settingsEvents(
+                                                        settingsEventsfilename,
+                                                        settingsEvents)
+
         # save events
-        save_file(events, new_filename+'_events.tsv', new_filepath)
+        if events!=[]:
+            save_file(events, new_filename+'_events.tsv', new_filepath)
+        if settingsEvents!={}:
+            save_file(settingsEvents, new_filename+'_events.json',
+                      new_filepath)
 
 
     def create_InfoParticipantsFile(self, infofilesname, list_settings, path):
@@ -319,16 +371,20 @@ class DataStandardisation:
             Path of the new BIDS dara directory
         '''
 
-        # extract info participants in infoFiles
-        participant = self.process.Extract_infoParticipants(infofilesname,
-                                                            list_settings)
-
         # creation of file name
         if self.process.taskname:
-            filename = 'task-'+self.process.taskname+'_participants.tsv'
+            filename = 'task-'+self.process.taskname+'_participants'
         else:
-            filename = 'participants.tsv'
+            filename = 'participants'
 
-        # save participant
-        save_file(participant, filename, path)
+        # extract info participants in infoFiles
+        file_tsv = self.process.extract_infoParticipants(infofilesname,
+                                                            list_settings)
+        # save participant.tsv
+        save_file(file_tsv, filename+'.tsv', path)
 
+        file_json = {}
+        for k in list_settings:
+            file_json[k] = {"Description": None}
+        # save participant.json
+        save_file(file_json, filename+'.json', path)

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import numpy as np
 from .File import open_file, save_file
 
 
@@ -105,6 +106,74 @@ class InfoFilesError(Exception):
             self.message += doc_fct
 
 
+class settingsEventsError(Exception):
+
+    '''
+    Returns an error if the settingsEvents file is not good
+    '''
+
+    def __init__(self, error, settingsEventsfilesname, list_events):
+
+        self.settingsEventsfilesname = settingsEventsfilesname
+        self.list_events = list_events
+        self.message = ''
+
+        if error=='noSettingsEventsFiles':
+            self.create_settingsEvents()
+
+        elif error=='missingEvents':
+            self.missing_Events()
+
+    def __str__(self):
+
+        return self.message
+
+    def create_settingsEvents(self):
+
+        '''
+        Error message if the eventJSON file does not exist
+        '''
+
+        self.message = "The file containing the events settings "
+        self.message += "does not exist \n"
+        self.message += "or is not in the right format \n"
+        self.message += "this file must be in json format and "
+        self.message += "must contain information on the following events: "
+        self.message += "\n%s\n \n"%self.list_events
+        self.message += "this information must contain a description "
+        self.message += "of the event: "
+        self.message += "'event': {'Description':{'description of event'}\n"
+        self.message += "Before continuing, you can create it "
+        self.message += "or do it automatically with the function:\n \n"
+
+        fct = StandardisationProcess('').create_settingsEvents
+        arg = fct.__code__.co_varnames[1:fct.__code__.co_argcount]
+
+        name_fct = fct.__name__
+        doc_fct = fct.__doc__
+        arg_fct = str(tuple([x for x in arg]))
+
+        self.message += name_fct
+        self.message += arg_fct + "\n"
+        self.message += doc_fct
+
+    def missing_Events(self):
+
+        '''
+        Error message if the settingsEvents file does not contain all events
+        '''
+
+        self.message = "Your %s file containing "%self.settingsEventsfilesname
+        self.message += "the events settings is incomplete \n"
+        self.message += "the %s events "%self.list_events
+        self.message += "are not filled in. \n"
+        self.message += "this information must contain a description "
+        self.message += "of the event: "
+        self.message += "'event': {'Description':{'description of event'}\n"
+        self.message += "Before continuing, please complete your file and "
+        self.message += "check that it contains the correct information "
+
+
 class StandardisationProcess:
 
     '''
@@ -123,9 +192,9 @@ class StandardisationProcess:
         self.participant = None
         self.taskname = None
         self.infofilesname = None
+        self.settingsEventsfilename = None
 
-        self.required_setting = ['TaskName',
-                                 'SamplingFrequency',
+        self.required_setting = ['SamplingFrequency',
                                  'SampleCoordinateUnit',
                                  'SampleCoordinateSystem',
                                  'EnvironmentCoordinates',
@@ -266,14 +335,16 @@ class StandardisationProcess:
                     #----------------------------------------------------------
                     # check if eventsfile exist
                     #----------------------------------------------------------
-                    filename_ = f[:-len(dataformat)]
-                    path_events = os.path.join(root, filename_+'.tsv')
-                    events_is_file = os.path.isfile(path_events)
+                    eventsfilename = None
 
-                    if events_is_file:
-                        eventsfilename = filename_+'.tsv'
-                    else:
-                        eventsfilename = None
+                    filename_ = f[:-len(dataformat)]
+
+                    for ext in ['.tsv', '.csv']:
+                        path_events = os.path.join(root, filename_+ext)
+                        events_is_file = os.path.isfile(path_events)
+
+                        if events_is_file:
+                            eventsfilename = filename_+ext
                     #----------------------------------------------------------
 
                     path = root.replace(self.dirpath, '')
@@ -410,6 +481,57 @@ class StandardisationProcess:
 
 
     #--------------------------------------------------------------------------
+    # dataset_description
+    #--------------------------------------------------------------------------
+    def dataset_description_init(self):
+
+        '''
+        Initialize the dataset_description
+
+        Returns
+        -------
+        dataset_description: dict
+            A dictionary containing the description of the experiment
+        '''
+
+        dataset_description = dict()
+
+        #----------------------------------------------------------------------
+        # REQUIRED
+        #----------------------------------------------------------------------
+        dataset_description['Name'] = None # Name of the dataset.
+                                           # (string)
+
+        dataset_description['BIDSVersion'] = "1.8.1" # The version of the BIDS
+                                                     # standard that was used.
+                                                     # (string)
+
+
+
+        return dataset_description
+
+    def create_dataset_description(self):
+
+        '''
+        Create an dataset_description file in the directory
+        '''
+
+        # Initialize the settings
+        dataset_description = self.dataset_description_init()
+
+        # save the settings
+        save_file(dataset_description, 'dataset_description.json',
+                  self.dirpath)
+
+        message = "The file %s/dataset_description.json "%self.dirpath
+        message += "has just been created \n"
+        message += "Before continuing, please complete it with "
+        message += "the correct information "
+
+        print(message)
+
+
+    #--------------------------------------------------------------------------
     # Settings
     #--------------------------------------------------------------------------
     def settings_init(self):
@@ -426,196 +548,230 @@ class StandardisationProcess:
         settings = dict()
 
         #----------------------------------------------------------------------
-        # REQUIRED
-        #----------------------------------------------------------------------
-        # Name of the task. No two tasks should have the same name. The task
-        #  label included in the file name is derived from this TaskName field
-        #  by removing all non-alphanumeric (`[a-zA-Z0-9]`) characters.
-        #  For example `TaskName` `"faces n-back"` will correspond to task
-        #  label `facesnback`. A RECOMMENDED convention is to name resting
-        #  state task using labels beginning with `rest`
-        settings['TaskName'] = None # string
-
-        #----------------------------------------------------------------------
         # RECOMMENDED
         #----------------------------------------------------------------------
-        # The name of the institution in charge of the equipment that produced
-        #  the measurements
-        settings['InstitutionName'] = None # string
+        settings['TaskName'] = None # Name of the task. No two tasks should
+                                    # have the same name.
+                                    # (string)
 
-        # The address of the institution in charge of the equipment that
-        #  produced the measurements
-        settings['InstitutionAddress']  = None # string
+        settings['Manufacturer'] = None # Manufacturer of the equipment that
+                                        # produced the measurements.
+                                        # (string)
 
-        # Manufacturer of the equipment that produced the measurements.
-        #  Manufacturer of the eye-tracking system
-        #  For example `"SR-Research"`, `"Tobii"`, `"SMI"`, `"Gazepoint"`,
-        #  `"Pupil Labs"`, `"Custom built"`, ... , `"Other"`
-        settings['Manufacturer'] = None # string
+        settings['ManufacturersModelName'] = None # Manufacturer's model name
+                                                  # of the equipment that
+                                                  # produced the measurements.
+                                                  # (string)
 
-        # Manufacturer's model name of the equipment that produced the
-        #  measurements. Manufacturer's designation of the eye-tracker model
-        #  For example `"Eye-link 1000"`
-        settings['ManufacturersModelName'] = None # string
+        settings['SoftwareVersion'] = None # Manufacturer's designation of
+                                           # software version of the equipment
+                                           # that produced the measurements.
+                                           # (string)
 
-        # Version of the software that was used to present the stimuli
-        settings['SoftwareVersion'] = None # string
-
-        # Longer description of the task.
-        settings['TaskDescription'] = None # string
-
-        # Text of the instructions given to participants before the recording.
-        #  Text of the instructions given to participants before the experiment
-        settings['Instructions'] = None # string
-
-        # [URI](/02-common-principles.html#uniform-resource-indicator) of the
-        #  corresponding [Cognitive Atlas](https://www.cognitiveatlas.org/)
-        #  Task term.
-        #  For example, [Resting State with eyes closed]
-        #  (http://www.cognitiveatlas.org/task/id/trm_54e69c642d89b)
-        settings['CogAtlasID'] = None # string
-
-        # [URI](/02-common-principles.html#uniform-resource-indicator) of the
-        #  corresponding [CogPO](http://www.cogpo.org/) term that describes the
-        #  task
-        #  For example, [Rest](http://wiki.cogpo.org/index.php?title=Rest)
-        settings['CogPOID'] = None # string
-
-        # The serial number of the equipment that produced the measurements.
-        #  A pseudonym can also be used to prevent the equipment from being
-        #  identifiable, so long as each pseudonym is unique within the dataset
-        settings['DeviceSerialNumber'] = None # string
+        settings['DeviceSerialNumber'] = None # The serial number of the
+                                              # equipment that produced the
+                                              # measurements. A pseudonym can
+                                              # also be used to prevent the
+                                              # equipment from being
+                                              # identifiable, so long as each
+                                              # pseudonym is unique within the
+                                              # dataset.
+                                              # (string)
 
         #----------------------------------------------------------------------
         # REQUIRED
         #----------------------------------------------------------------------
-        # Sampling frequency (in Hz) of the corresponding data in the recording
-        #  (for example, `1000`). If the sampling frequency change across run,
-        #  sidecar JSON document must be created specifying the run number
-        settings['SamplingFrequency'] = None # number
+        settings['SamplingFrequency'] = None # Sampling frequency (in Hz) of
+                                             # all the data in the recording,
+                                             # regardless of their type (for
+                                             # example, 2400).
+                                             # (number)
 
-        # Unit of individual samples (`"pixel"`, `"mm"` or `"cm"`)
-        settings['SampleCoordinateUnit'] = None # string
+        settings['SampleCoordinateUnit'] = None # Unit of individual samples
+                                                # ("pixel", "mm" or "cm").
+                                                # (string)
 
-        # Classical screen-based eye tracking data would be `"gaze-on-screen"`,
-        #  but `"eye-in-head"` or `"gaze-in-world"` are also possible
-        #  coordinate systems (for example for virtual reality)
-        settings['SampleCoordinateSystem'] = None # string
+        settings['SampleCoordinateSystem'] = None # Coordinate system of the
+                                                  # sampled gaze position data.
+                                                  # Generally eye-tracker are
+                                                  # set to use "gaze-on-screen"
+                                                  # coordinate system but you
+                                                  # may use "eye-in-head" or
+                                                  # "gaze-in-world" or other
+                                                  # alternatives of your
+                                                  # choice. If you use the
+                                                  # standard "gaze-on-screen",
+                                                  # it is RECOMMENDED to use
+                                                  # this exact label.
+                                                  # (string)
 
-        # Coordinates origin (or zero), for gaze-on-screen coordinates, this
-        #  can be for example: `"top-left"` or `"center"`. For virtual reality
-        #  this could be, amongst others, spherical coordinates
-        settings['EnvironmentCoordinates'] = None # string
+        settings['EnvironmentCoordinates'] = None # Coordinates origin (or
+                                                  # zero), for gaze-on-screen
+                                                  # coordinates, this can be
+                                                  # for example: "top-left" or
+                                                  # "center". For virtual
+                                                  # reality this could be,
+                                                  # amongst others, spherical
+                                                  # coordinates.
+                                                  # (string)
 
-        # Screen size in cm (for example `[47.2, 29.5]` for a screen of
-        #  47.2-length by 29.5-height cm), if no screen use `n/a`
-        settings['ScreenSize'] = None # array of numbers or string "n/a"
+        settings['ScreenSize'] = None # Screen size in cm, excluding potential
+                                      # screen borders (for example
+                                      # [47.2, 29.5] for a screen of 47.2-width
+                                      # by 29.5-height cm), if no screen use
+                                      # n/a.
+                                      # (array of numbers or "n/a")
 
-        # Screen resolution in pixel (for example `[1920, 1200]` for a screen
-        #  of 1920-length by 1080-height pixels), if no screen use `n/a`
-        settings['ScreenResolution'] = None # array of numbers
-                                                 #  or string "n/a"
+        settings['ScreenResolution'] = None # Screen resolution in pixel (for
+                                            # example [1920, 1200] for a screen
+                                            # of 1920-width by 1080-height
+                                            # pixels), if no screen use n/a.
+                                            # (array of integers or "n/a")
 
-        # Screen distance in cm (e.g `60` for a screen distance of 60 cm), if
-        #  no screen use `"n/a"`. For MRI, it corresponds to the distance
-        #  between the head-coil mirror to the projection screen for example
-        settings['ScreenDistance'] = None # array of numbers
-                                               #  or string "n/a"
+        settings['ScreenDistance'] = None # Distance between the participant's
+                                          # eye and the screen. If no screen
+                                          # was used, use n/a.
+                                          # (numbers or "n/a")
 
         #----------------------------------------------------------------------
         # RECOMMENDED
         #----------------------------------------------------------------------
-        # List of included events with message specifications.
-        #  For example, if fixation markers from the EyeLink are included add:
-        #  `[[Start of fixation: “SFIX”], [End of fixation: “EFIX”]]`.
-        #  If no events are included write `None`
-        settings['IncludedEyeMovementEvents'] = None # object of objects
-                                                          #  or string "n/a"
+        settings['IncludedEyeMovementEvents'] = None # List of included events
+                                                     # with message
+                                                     # specifications.
+                                                     # For example, if fixation
+                                                     # markers from the EyeLink
+                                                     # are included add:
+                                                     # [[Start of fixation:
+                                                     # “SFIX”],
+                                                     # [End of fixation:
+                                                     # “EFIX”]]`.
+                                                     # (object of objects)
 
-        # Name the event detection algorithm. If a detection algorithm is used,
-        #  settings SHOULD be present in `DetectionAlgorithmSettings`
-        settings['DetectionAlgorithm'] = None # string
+        settings['StartMessage'] = None # The message sent to the eye tracker
+                                        # to indicate the start of each trial.
+                                        # Could be the start of the
+                                        # presentation of an image, word,
+                                        # video, and so on
+                                        # (string)
 
-        # List of parameter settings used in the `DetectionAlgorithm` for eye
-        #  movement events
-        settings['DetectionAlgorithmSettings'] = None # object of objects
-                                                           #  or string "n/a"
+        settings['EndMessage']  = None # The message sent to the eye tracker to
+                                       # indicate the end of each trial
+                                       # presentation. Could be the end of the
+                                       # presentation of an image, word, video,
+                                       # and so on
+                                       # (string)
 
-        # The message sent to the eye tracker to indicate the start of each
-        #  trial. Could be the start of the presentation of an image, word,
-        #  video, and so on
-        settings['StartMessage'] = None # string
+        settings['CalibrationType'] = None # Description of the calibration
+                                           # procedure. For example the "H3"
+                                           # for horizontal calibration with 3
+                                           # positions or "HV9" for horizontal
+                                           # and vertical calibration with 9
+                                           # positions, or one point
+                                           # calibration.
+                                           # (string)
 
-        # The message sent to the eye tracker to indicate the end of each trial
-        #  presentation. Could be the end of the presentation of an image,
-        #  word, video, and so on
-        settings['EndMessage']  = None # string
+        settings['CalibrationUnit'] = None # Unit of "CalibrationPosition".
+                                           # Must be one of:
+                                           # "pixel", "mm", "cm".
+                                           # (string)
 
-        # When the paradigm includes pressing a key, message identifying this
-        #  should be included to the sidecar JSON file
-        settings['KeyPressMessage'] = None # string
+        settings['CalibrationPosition'] = None # Provide a list of X/Y
+                                               # coordinates in the
+                                               # CalibrationUnit. For example,
+                                               # using 5 positions calibration
+                                               # presented on an HD screen, it
+                                               # could be [[960,50],[960,540],
+                                               # [960,1030],[50,540],
+                                               # [1870,540]].
+                                               # (array of arrays)
 
-        # Description of the calibration procedure. For example the `"H3"` for
-        #  horizontal calibration with 3 positions or `"HV9"` for horizontal
-        #  and vertical calibration with 9 positions, or one point calibration
-        settings['CalibrationType'] = None # string
+        settings['MaximalCalibrationError'] = None # Maximal calibration error
+                                                   # in degree. (number)
 
-        # Unit of `CalibrationPosition`: `"pixel"`, `"mm"` or `"cm"`
-        settings['CalibrationUnit'] = None # string
+        settings['AverageCalibrationError'] = None # Average calibration error
+                                                   # in visual degree.
+                                                   # (number)
 
-        # Provide a list of X/Y coordinates in the `CalibrationUnit`.
-        #  For example, using 5 positions calibration presented on an HD
-        #  screen, it could be
-        #  `[[960,50],[960,540],[960,1030],[50,540],[1870,540]]`
-        settings['CalibrationPosition'] = None # array of number
+        settings['CalibrationList'] = None # List of lists including
+                                           # information for each calibration.
+                                           # This list includes the calibration
+                                           # type, recorded eye, maximal
+                                           # calibration error, average
+                                           # calibration error, and time
+                                           # relative to the first event of the
+                                           # event file.
+                                           # (array of arrays)
 
-        # Maximal calibration error in visual degree
-        settings['MaximalCalibrationError'] = None # number
+        settings['RecordedEye'] = None # Specification for which eye was
+                                       # tracked.
+                                       # Must be one of:
+                                       # "left", "right", "both".
+                                       # (string)
 
-        # Average calibration error in visual degree
-        settings['AverageCalibrationError'] = None # number
+        settings['EyeCameraSettings'] = None # A field to store any settings
+                                             # that influence the resolution
+                                             # and quality of the eye imagery.
+                                             # Autowhitebalance? Changes in
+                                             # sharpness?
+                                             # (object of objects)
 
-        # List of lists including information for each calibration. This list
-        #  includes the calibration type, recorded eye, maximal calibration
-        #  error, average calibration error, and time relative to the first
-        #  event of the event file
-        settings['CalibrationList'] = None # object of object
+        settings['FeatureDetectionSettings'] = None # A place to store
+                                                    # arbitrary information
+                                                    # related to feature
+                                                    # detection. For example
+                                                    # Minimum/maximum pupil
+                                                    # size.
+                                                    # (object of objects)
 
-        # Specification for which eye was tracked
-        #  (`"Left"`, `"Right"`, `"Both"`)
-        settings['RecordedEye'] = None # string
+        settings['GazeMappingSettings'] = None # A place to store arbitrary
+                                               # information related to gaze
+                                               # mapping. For example, if there
+                                               # was a threshold on pupil
+                                               # confidence REQUIRED for gaze
+                                               # mapping, one could store that
+                                               # information here.
+                                               # (object of objects)
 
-        # A field to store any settings that influence the resolution and
-        #  quality of the eye imagery. Autowhitebalance? Changes in sharpness?
-        settings['EyeCameraSettings'] = None # object of object
+        settings['RawDataFilters'] = None # Filter settings applied to
+                                          # eye-movement raw data. For example
+                                          # Eyelink trackers typically
+                                          # automatically filter the raw data.
+                                          # (string)
 
-        # A place to store arbitrary information related to feature detection.
-        #  For example Minimum/maximum pupil size.
-        settings['FeatureDetectionSettings'] = None # object of object
+        settings['ScreenRefreshRate'] = None # Refresh rate of the screen
+                                             # (when used), in Hertz
+                                             # (equivalent to frames per
+                                             # second, "FPS").
+                                             # (number)
 
-        # A place to store arbitrary information related to gaze mapping.
-        #  For example, if there was a threshold on pupil confidence required
-        #  for gaze mapping, one could store that information here
-        settings['GazeMappingSettings'] = None # object of object
+        settings['ScreenAOIDefinition'] = None # A description of the shape of
+                                               # the Screen AOIs and what
+                                               # coordinates are used.
+                                               # ["square", ["x_start",
+                                               # "x_stop", "y_start",
+                                               # "y_stop"]]
+                                               # Other options:
+                                               # "custom"/"circle"/"triangle",
+                                               # [["x", "y"], ["x", "y"],
+                                               # ["x", "y"], and so on.].
+                                               # (object of objects)
 
-        # Filter settings applied to eye-movement raw data.
-        #  For example Eyelink trackers typically automatically filter the raw
-        #  data.
-        settings['RawDataFilters'] = None # string
+        settings['PupilFitMethod'] = None # The method employed for fitting the
+                                          # pupil, for example "centre-of-mass"
+                                          # or "ellipse". If "centre-of-mass"
+                                          # or "ellipse" method is used, it is
+                                          # RECOMMENDED to use these exact
+                                          # labels.
+                                          # (string)
 
-        # Refresh rate of the screen (when used), in Hertz
-        #  For example, `60` for 60 Hz.
-        settings['ScreenRefreshRate'] = None # number
+        settings['StartTime'] = None # Eye-tracking timestamp corresponding to
+                                     # the onset (start) of the run.
+                                     # (number)
 
-        # Define, what shape are the AOIs and what coordinates are used.
-        #  `[“square”,[“x_start”, “x_stop”, “y_start”, “y_stop”]]`
-        #  Other options: `“custom”/”circle”/”triangle”,
-        #  [[“x”,”y”],[“x”,”y”],[“x”,”y”],and so on.]`
-        settings['AOIDefinition'] = None # object of object
-
-        # The method employed for fitting the pupil:
-        #  `"centre-of-mass"` or `"ellipse"`.
-        settings['PupilFitMethod'] = None # string
+        settings['StopTime'] = None # Eye-tracking timestamp corresponding to
+                                    # the offset (stop) of the run.
+                                    # (number)
 
         return settings
 
@@ -638,7 +794,7 @@ class StandardisationProcess:
 
         print(message)
 
-    def Extract_settings_jsonFile(self, filename, old_settings=None):
+    def extract_settings_jsonFile(self, filename, old_settings=None):
 
         '''
         Process a given json file to extract the settings
@@ -673,7 +829,7 @@ class StandardisationProcess:
 
         return settings
 
-    def Extract_settings_infoFiles(self, filename, infofilesname,
+    def extract_settings_infoFiles(self, filename, infofilesname,
                                    list_settings, old_settings=None):
 
         '''
@@ -725,7 +881,7 @@ class StandardisationProcess:
 
         return settings
 
-    def Check_required_settings(self, settings):
+    def check_required_settings(self, settings):
 
         '''
         Check that all the required settings are filled.
@@ -764,7 +920,212 @@ class StandardisationProcess:
 
         return []
 
-    def Extract_events_tsvFile(self, filename, filepath, old_events=None):
+    def settingsEvents_init(self, infofilesname):
+
+        '''
+        Initialize the events
+
+        Parameters
+        ----------
+        infofilesname: str
+            Name of the file containing the information on the files to be
+            BIDSified
+
+        Returns
+        -------
+        eventsJSON: list
+            A dictionary containing the events in the events files
+        '''
+
+        # Open the information file
+        infoFiles = open_file(infofilesname, self.dirpath)
+        events = []
+        for f in infoFiles:
+
+            filepath = os.path.join(self.dirpath, f['filepath'])
+            if f['eventsfilename']:
+                eventsfile = open_file(f['eventsfilename'], filepath)
+
+                for e in eventsfile:
+                    events.extend(e.keys())
+
+        settingsEvents = {}
+        if len(events)!=0:
+            events = np.unique(events)
+
+            for e in events:
+                if e!="trial":
+                    settingsEvents[e] = {"Description": ""}
+
+        return settingsEvents
+
+    def create_settingsEvents(self, infofilesname):
+
+        '''
+        Create an event settings file in the directory.
+
+        Parameters
+        ----------
+        infofilesname: str
+            Name of the file containing the information on the files to be
+            BIDSified
+        '''
+
+        settingsEvents = self.settingsEvents_init(infofilesname)
+
+        # save the settings
+        save_file(settingsEvents, 'settingsEvents.json', self.dirpath)
+
+        message = "The file %s/settingsEvents.json "%self.dirpath
+        message += "has just been created \n"
+        message += "Before continuing, please complete it with "
+        message += "the correct information "
+
+        print(message)
+
+    def check_settingsEvents(self, filename, infofilesname):
+
+        '''
+        Check an information file on all the data files present in the
+        directory
+
+        Parameters
+        ----------
+        filename: str
+            Name of the file containing the information on the files to be
+            BIDSified
+        infofilesname: str
+            Name of the file containing the information on the files to be
+            BIDSified
+        '''
+
+        # Open the information file
+        infoFiles = open_file(infofilesname, self.dirpath)
+
+        #----------------------------------------------------------------------
+        # check the list of events that should be present in the settingsEvents
+        # file
+        #----------------------------------------------------------------------
+        events = []
+        for f in infoFiles:
+
+            filepath = os.path.join(self.dirpath, f['filepath'])
+            if f['eventsfilename']:
+                eventsfile = open_file(f['eventsfilename'], filepath)
+
+                for e in eventsfile:
+                    events.extend(e.keys())
+        events = list(np.unique(events))
+        if 'trial' in events:
+            events.remove('trial')
+        #----------------------------------------------------------------------
+
+        if len(events)!=0:
+
+            #------------------------------------------------------------------
+            # Creating a list of potential settingsEvents
+            #------------------------------------------------------------------
+            settingsEventsPotential = []
+
+            if filename:
+                # check if filename is file
+                path_file = os.path.join(self.dirpath, filename)
+                filename_is_file = os.path.isfile(path_file)
+
+                # add filename to the potential settingsEvents
+                if filename_is_file:
+                    settingsEventsPotential = [filename]
+            else:
+                # add all .json files to the potential infoFiles
+                list_files = os.listdir(self.dirpath)
+                #  f.split('.')[-1] is the file format
+                settingsEventsPotential = [f for f in list_files
+                                          if f.split('.')[-1]=='json']
+            #------------------------------------------------------------------
+
+            settingsEvents = None
+            error = None
+
+            if len(settingsEventsPotential)!=0:
+
+                for filename in settingsEventsPotential:
+
+                    if not settingsEvents:
+
+                        # open settingsEvents potential
+                        settingsEvents_ = open_file(filename, self.dirpath)
+
+                        list_events = []
+                        for e in settingsEvents_.keys():
+                            if type(settingsEvents_[e])==dict:
+                                if "Description" in settingsEvents_[e].keys():
+                                    list_events.append(e)
+
+                        if len(list_events)!=0:
+
+                            e_ = [e for e in events if e not in list_events]
+
+                            # check if all events are present in settingsEvents
+                            if len(e_)!=0:
+                                error = 'missingEvents'
+
+                            settingsEvents = '%s/%s'%(self.dirpath, filename)
+
+            # check if settingsEvents exist
+            if not settingsEvents:
+                error = 'noSettingsEventsFiles'
+
+            # returns an error if settingsEvents is not good
+            if error:
+                raise settingsEventsError(error, settingsEvents, e_)
+
+            # change self.settingsEventsfilesname if settingsEvents is good
+            else:
+                self.settingsEventsfilename = settingsEvents.split('/')[-1]
+
+        else:
+            self.settingsEventsfilename = None
+
+
+    def extract_settingsEvents(self, filename, old_settingsEvents=None):
+
+        '''
+        Process a given json file to extract the settings
+        and fill-in the corresponding settings field
+
+        Parameters
+        ----------
+        filename: str
+            Name of the file containing the events settings in the BIDSified
+            data
+        old_settingsEvents: dict or None (default None)
+            A dictionary containing the settings for the events in the
+            experiment
+
+        Returns
+        -------
+        settingsEvents: dict
+            A dictionary containing the settings for the events in the
+            experiment
+        '''
+
+        if old_settingsEvents:
+            settingsEvents = old_settingsEvents
+        else:
+            settingsEvents = {}
+
+        # open new settings
+        new_settingsEvents = open_file(filename, self.dirpath)
+
+        # completes the settings with the new settings
+        for s in new_settingsEvents.keys():
+            if new_settingsEvents[s]:
+                settingsEvents[s] = new_settingsEvents[s]
+
+        return settingsEvents
+
+
+    def extract_events_tsvFile(self, filename, filepath, old_events=None):
 
         '''
         Extract the trial events from the tsv file
@@ -821,7 +1182,7 @@ class StandardisationProcess:
     #--------------------------------------------------------------------------
     # infoParticipants
     #--------------------------------------------------------------------------
-    def Extract_infoParticipants(self, filename, list_infoparticipants):
+    def extract_infoParticipants(self, filename, list_infoparticipants):
 
         '''
         Extract the participant informations from the tsv file
