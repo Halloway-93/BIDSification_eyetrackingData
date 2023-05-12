@@ -6,6 +6,34 @@ import json
 import csv
 import gzip
 
+def dirtree(dirpath):
+
+    """
+    Allows to display the tree structure of a ``dirpath`` data folder.
+
+    Parameters
+    ----------
+    dirpath: str
+        Data directory path
+    """
+
+    # creation of the tree structure
+    tree = ''
+
+    # allows you to add indentation to the text to make it easier to read
+    indent = ' '*4
+
+    #----------------------------------------------------------------------
+    # loop allowing to add in the tree variable the tree of the folder
+    #----------------------------------------------------------------------
+    for root, dirs, files in os.walk(dirpath):
+        level = root.replace(dirpath, '').count(os.sep)
+        tree += indent*level + os.path.basename(root) + '/\n'
+        for f in files:
+            tree += indent*(level+1) + f + '\n'
+    #----------------------------------------------------------------------
+
+    print(tree)
 
 def open_file(filename, filepath):
 
