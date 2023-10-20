@@ -7,7 +7,7 @@ import BIDSification_eyetrackingData
 
 setup(
     name='BIDSification_eyetrackingData',
-    version=BIDSification_eyetrackingData.__version__,
+    version=BIDSification_eyetrackingData.version__,
     packages=find_packages(),
     author="",
     author_email="",
